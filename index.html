@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Lançamentos - Integrado</title>
+    <title>Sistema de Lançamentos - Modo Contínuo</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -19,11 +19,9 @@
         .btn-novo { background-color: #34a853; }
         .btn-novo:hover { background-color: #2d8e47; }
         .btn-fornecedor { background-color: #fbbc05; color: #333; }
-        .btn-fornecedor:hover { background-color: #e0a800; }
         .btn-imprimir { background-color: #6c757d; }
-        .btn-imprimir:hover { background-color: #5a6268; }
         .btn-salvar { background-color: #1a73e8; width: 100%; padding: 12px; margin-top: 10px; }
-        .btn-salvar:hover { background-color: #1557b0; }
+        
         .btn-acao { padding: 5px 10px; font-size: 13px; margin-right: 5px; border-radius: 4px; border: none; cursor: pointer; color: white;}
         .btn-editar { background-color: #fbbc05; color: #333;}
         .btn-excluir { background-color: #ea4335; }
@@ -31,18 +29,14 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 12px; }
-        tr:hover { background-color: #fcfcfc; }
 
-        /* Modais */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
         .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; width: 90%; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
         .modal-lancamento { max-width: 600px; }
-        .modal-fornecedor { max-width: 500px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
         
-        /* Grid para o formulário ficar compacto (2 colunas) */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
         
@@ -55,7 +49,20 @@
         .resultado-lucro { background-color: #e6f4ea; padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 5px solid #34a853; font-size: 16px; text-align: center; }
         .lucro-negativo { background-color: #fce8e6; border-left-color: #ea4335; }
 
-        /* Lista de fornecedores dentro do modal */
+        /* Estilo para a opção de manter dados */
+        .manter-dados-container {
+            grid-column: span 2;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px dashed #ccc;
+            margin-bottom: 5px;
+        }
+        .manter-dados-container input { width: auto; cursor: pointer; }
+
         .lista-fornecedores { max-height: 200px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
         .item-fornecedor { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
         .item-fornecedor button { background: none; border: none; color: #ea4335; cursor: pointer; font-weight: bold; }
@@ -93,8 +100,7 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="listaItens">
-                </tbody>
+            <tbody id="listaItens"></tbody>
         </table>
     </main>
 
@@ -104,7 +110,16 @@
             <h2 id="tituloModalLancamento" style="margin-top: 0;">Lançar Item</h2>
             
             <form id="formLancamento">
-                <input type="hidden" id="editIndex" value=""> <div class="form-grid">
+                <input type="hidden" id="editIndex" value="">
+                
+                <div class="form-grid">
+                    <div class="manter-dados-container">
+                        <input type="checkbox" id="manterDados" checked>
+                        <label for="manterDados" style="cursor:pointer; margin:0; font-size: 13px;">
+                            <strong>Modo Contínuo:</strong> Manter Data e Fornecedor após lançar
+                        </label>
+                    </div>
+
                     <div class="form-group full-width">
                         <label>Data:</label>
                         <input type="date" id="dataLancamento" required>
@@ -132,7 +147,7 @@
                         <input type="number" id="precoCusto" step="0.01" oninput="calcularLucro()">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group full-width">
                         <label>Gastos Extras (R$):</label>
                         <input type="number" id="gastos" step="0.01" value="0" oninput="calcularLucro()">
                     </div>
@@ -151,74 +166,51 @@
         <div class="modal-content modal-fornecedor">
             <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
             <h2 style="margin-top: 0;">Cadastro de Fornecedores</h2>
-            
             <div class="form-grid">
-                <div class="form-group">
-                    <label>Código:</label>
-                    <input type="text" id="novoCadCodigo" placeholder="Ex: 10">
-                </div>
-                <div class="form-group">
-                    <label>Nome do Fornecedor:</label>
-                    <input type="text" id="novoCadNome" placeholder="Ex: Distribuidora X">
-                </div>
+                <div class="form-group"><label>Código:</label><input type="text" id="novoCadCodigo"></div>
+                <div class="form-group"><label>Nome:</label><input type="text" id="novoCadNome"></div>
             </div>
-            <button class="btn btn-novo" style="width: 100%; margin-top: 10px;" onclick="salvarNovoFornecedor()">Adicionar Fornecedor</button>
-
-            <div class="lista-fornecedores" id="listaFornecedoresModal">
-                </div>
+            <button class="btn btn-novo" style="width:100%; margin-top:10px;" onclick="salvarNovoFornecedor()">Gravar Fornecedor</button>
+            <div class="lista-fornecedores" id="listaFornecedoresModal"></div>
         </div>
     </div>
 
     <script>
-        // Configurações da API Planilha Google
         const PLANILHA_ID = '1cl89xjWPjxyULh4Jw5XZc89uO057pDPaivUKSCiy-xM';
         const URL_DADOS = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, E`;
 
-        // Estado do aplicativo (Salvo no LocalStorage do navegador)
         let listaProdutos = [];
         let fornecedoresCadastrados = JSON.parse(localStorage.getItem('fornecedores')) || [];
         let lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
 
-        // Inicialização
         window.onload = () => {
             carregarProdutos();
             document.getElementById('filtroData').value = new Date().toISOString().split('T')[0];
             renderizarTabela();
         };
 
-        // --- Google Sheets (Produtos) ---
         async function carregarProdutos() {
             try {
                 const response = await fetch(URL_DADOS);
                 const text = await response.text();
                 const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
-                
                 listaProdutos = json.table.rows.map(row => ({
                     codigo: row.c[0] ? row.c[0].v.toString() : '',
                     nome: row.c[1] ? row.c[1].v : '',
                     preco: row.c[2] ? parseFloat(row.c[2].v) : 0
                 }));
-            } catch (e) {
-                console.error("Erro ao carregar planilha:", e);
-                alert("Atenção: Não foi possível carregar os produtos do Google Sheets.");
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // --- Controle de Modais ---
-        function fecharModal(idModal) {
-            document.getElementById(idModal).style.display = "none";
-        }
+        function fecharModal(id) { document.getElementById(id).style.display = "none"; }
 
-        // --- Lógica de Lançamentos ---
         function abrirModal(indexEdit = null) {
             document.getElementById('modalLancamento').style.display = "block";
             const form = document.getElementById('formLancamento');
             
             if (indexEdit !== null) {
-                // Modo Edição
                 document.getElementById('tituloModalLancamento').innerText = "Editar Lançamento";
                 document.getElementById('editIndex').value = indexEdit;
-                
                 const item = lancamentos[indexEdit];
                 document.getElementById('dataLancamento').value = item.dataRAW;
                 document.getElementById('codFornecedor').value = item.codFornecedor;
@@ -228,18 +220,16 @@
                 document.getElementById('precoVenda').value = item.venda;
                 document.getElementById('precoCusto').value = item.custo;
                 document.getElementById('gastos').value = item.gastos;
-                
                 calcularLucro();
             } else {
-                // Modo Novo Lançamento
                 document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
-                form.reset();
                 document.getElementById('editIndex').value = "";
-                document.getElementById('dataLancamento').value = document.getElementById('filtroData').value;
-                document.getElementById('nomeFornecedor').innerText = "";
-                document.getElementById('nomeProduto').innerText = "";
-                document.getElementById('valorLucro').innerText = "0.00";
-                document.getElementById('boxLucro').classList.remove('lucro-negativo');
+                // Ao abrir novo, só limpa produto se não for o primeiro do lote
+                if(!document.getElementById('manterDados').checked) {
+                    form.reset();
+                    document.getElementById('dataLancamento').value = document.getElementById('filtroData').value;
+                }
+                limparCamposProduto();
             }
         }
 
@@ -261,31 +251,23 @@
             const custo = parseFloat(document.getElementById('precoCusto').value) || 0;
             const gastos = parseFloat(document.getElementById('gastos').value) || 0;
             const lucro = venda - custo - gastos;
-            
             document.getElementById('valorLucro').innerText = lucro.toFixed(2);
-            if(lucro < 0) {
-                document.getElementById('boxLucro').classList.add('lucro-negativo');
-            } else {
-                document.getElementById('boxLucro').classList.remove('lucro-negativo');
-            }
+            document.getElementById('boxLucro').classList.toggle('lucro-negativo', lucro < 0);
         }
 
         function salvarLancamento() {
             const data = document.getElementById('dataLancamento').value;
-            const codProduto = document.getElementById('codProduto').value;
             const produtoNome = document.getElementById('nomeProduto').innerText;
-
             if (!data || produtoNome === "Produto não encontrado" || produtoNome === "") {
-                alert("Verifique os campos de data e código do produto.");
-                return;
+                alert("Preencha os dados corretamente."); return;
             }
 
-            const novoLancamento = {
+            const novo = {
                 dataRAW: data,
                 dataBR: data.split('-').reverse().join('/'),
                 codFornecedor: document.getElementById('codFornecedor').value,
                 nomeFornecedor: document.getElementById('nomeFornecedor').innerText,
-                codProduto: codProduto,
+                codProduto: document.getElementById('codProduto').value,
                 nomeProduto: produtoNome,
                 custo: parseFloat(document.getElementById('precoCusto').value || 0),
                 venda: parseFloat(document.getElementById('precoVenda').value || 0),
@@ -294,177 +276,101 @@
             };
 
             const editIndex = document.getElementById('editIndex').value;
+            if (editIndex !== "") lancamentos[editIndex] = novo;
+            else lancamentos.unshift(novo);
 
-            if (editIndex !== "") {
-                // Atualiza existente
-                lancamentos[editIndex] = novoLancamento;
-            } else {
-                // Cria novo no topo
-                lancamentos.unshift(novoLancamento);
-            }
-
-            // Salva no navegador e atualiza tela
             localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
-            fecharModal('modalLancamento');
             renderizarTabela();
+
+            // Lógica de Manter Fornecedor (Modo Contínuo)
+            if (document.getElementById('manterDados').checked && editIndex === "") {
+                limparCamposProduto();
+                document.getElementById('codProduto').focus();
+            } else {
+                fecharModal('modalLancamento');
+            }
+        }
+
+        function limparCamposProduto() {
+            document.getElementById('codProduto').value = "";
+            document.getElementById('nomeProduto').innerText = "";
+            document.getElementById('precoVenda').value = "";
+            document.getElementById('precoCusto').value = "";
+            document.getElementById('gastos').value = "0";
+            document.getElementById('valorLucro').innerText = "0.00";
+            document.getElementById('boxLucro').classList.remove('lucro-negativo');
         }
 
         function renderizarTabela() {
             const tbody = document.getElementById('listaItens');
             tbody.innerHTML = "";
-            const dataFiltro = document.getElementById('filtroData').value;
-
+            const filtro = document.getElementById('filtroData').value;
             lancamentos.forEach((item, index) => {
-                // Só mostra itens da data selecionada
-                if (item.dataRAW === dataFiltro) {
+                if (item.dataRAW === filtro) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${item.dataBR}</td>
-                        <td>${item.nomeFornecedor || '-'}</td>
-                        <td>${item.nomeProduto}</td>
-                        <td>R$ ${item.custo.toFixed(2)}</td>
-                        <td>R$ ${item.venda.toFixed(2)}</td>
-                        <td>R$ ${item.gastos.toFixed(2)}</td>
-                        <td style="color: ${item.lucro >= 0 ? '#34a853' : '#ea4335'}; font-weight: bold;">R$ ${item.lucro.toFixed(2)}</td>
+                        <td>${item.dataBR}</td><td>${item.nomeFornecedor}</td><td>${item.nomeProduto}</td>
+                        <td>R$ ${item.custo.toFixed(2)}</td><td>R$ ${item.venda.toFixed(2)}</td><td>R$ ${item.gastos.toFixed(2)}</td>
+                        <td style="color:${item.lucro >= 0 ? '#34a853' : '#ea4335'}; font-weight:bold;">R$ ${item.lucro.toFixed(2)}</td>
                         <td>
-                            <button class="btn-acao btn-editar" onclick="abrirModal(${index})">✎ Editar</button>
-                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${index})">✖ Excluir</button>
-                        </td>
-                    `;
+                            <button class="btn-acao btn-editar" onclick="abrirModal(${index})">✎</button>
+                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${index})">✖</button>
+                        </td>`;
                     tbody.appendChild(tr);
                 }
             });
         }
 
-        function excluirLancamento(index) {
-            if(confirm("Tem certeza que deseja excluir este lançamento?")) {
-                lancamentos.splice(index, 1);
-                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
-                renderizarTabela();
-            }
+        function excluirLancamento(i) {
+            if(confirm("Excluir item?")) { lancamentos.splice(i, 1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela(); }
         }
 
-        // --- Lógica de Fornecedores ---
-        function abrirModalFornecedor() {
-            document.getElementById('modalFornecedores').style.display = "block";
-            renderizarListaFornecedores();
-        }
-
+        function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display = "block"; renderizarListaFornecedores(); }
+        
         function buscarFornecedor() {
-            const cod = document.getElementById('codFornecedor').value;
-            const f = fornecedoresCadastrados.find(item => item.id === cod);
+            const f = fornecedoresCadastrados.find(f => f.id === document.getElementById('codFornecedor').value);
             document.getElementById('nomeFornecedor').innerText = f ? f.nome : "Não cadastrado";
         }
 
         function salvarNovoFornecedor() {
             const id = document.getElementById('novoCadCodigo').value;
             const nome = document.getElementById('novoCadNome').value;
-
-            if(!id || !nome) { alert("Preencha código e nome do fornecedor."); return; }
-            if(fornecedoresCadastrados.find(f => f.id === id)) { alert("Já existe um fornecedor com este código."); return; }
-
-            fornecedoresCadastrados.push({ id: id, nome: nome });
+            if(!id || !nome) return;
+            fornecedoresCadastrados.push({ id, nome });
             localStorage.setItem('fornecedores', JSON.stringify(fornecedoresCadastrados));
-            
-            document.getElementById('novoCadCodigo').value = "";
-            document.getElementById('novoCadNome').value = "";
             renderizarListaFornecedores();
-            buscarFornecedor(); // Atualiza caso estivesse preenchendo o lançamento
         }
 
         function renderizarListaFornecedores() {
             const div = document.getElementById('listaFornecedoresModal');
-            div.innerHTML = "";
-            if (fornecedoresCadastrados.length === 0) {
-                div.innerHTML = "<p style='color:#777; font-size:14px;'>Nenhum fornecedor cadastrado.</p>";
-                return;
-            }
-
-            fornecedoresCadastrados.forEach((f, index) => {
-                div.innerHTML += `
-                    <div class="item-fornecedor">
-                        <span><strong>${f.id}</strong> - ${f.nome}</span>
-                        <button onclick="excluirFornecedor(${index})">Excluir</button>
-                    </div>
-                `;
-            });
+            div.innerHTML = fornecedoresCadastrados.map((f, i) => `
+                <div class="item-fornecedor"><span><b>${f.id}</b> - ${f.nome}</span>
+                <button onclick="excluirFornecedor(${i})">Excluir</button></div>`).join('');
         }
 
-        function excluirFornecedor(index) {
-            if(confirm("Excluir este fornecedor?")) {
-                fornecedoresCadastrados.splice(index, 1);
-                localStorage.setItem('fornecedores', JSON.stringify(fornecedoresCadastrados));
-                renderizarListaFornecedores();
-            }
+        function excluirFornecedor(i) {
+            fornecedoresCadastrados.splice(i, 1);
+            localStorage.setItem('fornecedores', JSON.stringify(fornecedoresCadastrados));
+            renderizarListaFornecedores();
         }
 
-        // --- Lógica de Impressão ---
         function imprimirRelatorio() {
-            const dataFiltro = document.getElementById('filtroData').value;
-            const dataBR = dataFiltro.split('-').reverse().join('/');
+            const filtro = document.getElementById('filtroData').value;
+            const itens = lancamentos.filter(it => it.dataRAW === filtro);
+            if(itens.length === 0) return alert("Nada para imprimir hoje.");
             
-            const itensParaImprimir = lancamentos.filter(item => item.dataRAW === dataFiltro);
-            
-            if (itensParaImprimir.length === 0) {
-                alert("Nenhum lançamento para imprimir nesta data.");
-                return;
-            }
-
-            let htmlTabela = `
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif;">
-                    <thead>
-                        <tr style="background-color: #eee;">
-                            <th style="padding: 8px; border: 1px solid #ccc;">Data</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Fornecedor</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Produto</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Custo</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Venda</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Lucro</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            let totalLucro = 0;
-
-            itensParaImprimir.forEach(item => {
-                totalLucro += item.lucro;
-                htmlTabela += `
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ccc;">${item.dataBR}</td>
-                        <td style="padding: 8px; border: 1px solid #ccc;">${item.nomeFornecedor}</td>
-                        <td style="padding: 8px; border: 1px solid #ccc;">${item.nomeProduto}</td>
-                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.custo.toFixed(2)}</td>
-                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.venda.toFixed(2)}</td>
-                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.lucro.toFixed(2)}</td>
-                    </tr>
-                `;
+            let t = `<table border="1" style="width:100%; border-collapse:collapse;">
+                <thead><tr><th>Fornecedor</th><th>Produto</th><th>Custo</th><th>Venda</th><th>Lucro</th></tr></thead><tbody>`;
+            let total = 0;
+            itens.forEach(it => {
+                total += it.lucro;
+                t += `<tr><td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td><td>R$ ${it.custo.toFixed(2)}</td><td>R$ ${it.venda.toFixed(2)}</td><td>R$ ${it.lucro.toFixed(2)}</td></tr>`;
             });
-
-            htmlTabela += `
-                    </tbody>
-                </table>
-                <h3 style="text-align: right; font-family: sans-serif; margin-top: 20px;">
-                    Lucro Total do Dia: R$ ${totalLucro.toFixed(2)}
-                </h3>
-            `;
-
-            const janelaImpressao = window.open('', '', 'width=800,height=600');
-            janelaImpressao.document.write(`
-                <html>
-                <head>
-                    <title>Relatório Diário - ${dataBR}</title>
-                </head>
-                <body style="padding: 20px;">
-                    <h2 style="font-family: sans-serif; text-align: center;">Relatório de Lançamentos - ${dataBR}</h2>
-                    ${htmlTabela}
-                    <script>
-                        window.onload = function() { window.print(); window.close(); }
-                    <\/script>
-                </body>
-                </html>
-            `);
-            janelaImpressao.document.close();
+            t += `</tbody></table><h3>Lucro Total: R$ ${total.toFixed(2)}</h3>`;
+            
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`<html><body><h2>Relatório ${filtro.split('-').reverse().join('/')}</h2>${t}</body></html>`);
+            win.print(); win.close();
         }
     </script>
 </body>
