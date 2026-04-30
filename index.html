@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Lançamentos</title>
+    <title>COLMÉIA LANÇAMENTOS</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -65,7 +65,7 @@
 <body>
 
     <header>
-        <img src="COLE_O_SEU_LINK_AQUI" alt="Logo da Empresa" style="height: 50px;">
+        <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo da Empresa" style="height: 50px;">
 
         <h1 style="margin: 0; font-size: 24px;">Sistema de Lançamentos</h1>
     </header>
@@ -199,8 +199,14 @@
         window.onload = () => {
             carregarProdutos();
             const hoje = new Date().toISOString().split('T')[0];
+            
+            // Popula os filtros da tela inicial
             document.getElementById('filtroDataInicio').value = hoje;
             document.getElementById('filtroDataFim').value = hoje;
+            
+            // Garante que o campo do modal já inicie com a data de hoje carregada
+            document.getElementById('dataLancamento').value = hoje;
+            
             renderizarTabela();
         };
 
@@ -232,6 +238,7 @@
         function abrirModal(indexEdit = null) {
             document.getElementById('modalLancamento').style.display = "block";
             const form = document.getElementById('formLancamento');
+            const hoje = new Date().toISOString().split('T')[0];
             
             if (indexEdit !== null) {
                 document.getElementById('tituloModalLancamento').innerText = "Editar Lançamento";
@@ -251,11 +258,16 @@
                 document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
                 document.getElementById('editIndex').value = "";
                 
+                // Se NÃO for modo contínuo, zera tudo e coloca a data de hoje
                 if(!document.getElementById('manterDados').checked) {
                     form.reset();
-                    const hoje = new Date().toISOString().split('T')[0];
+                    document.getElementById('dataLancamento').value = hoje;
+                } 
+                // Se FOR modo contínuo, mas a data estiver em branco (por algum motivo), coloca a data de hoje
+                else if (document.getElementById('dataLancamento').value === "") {
                     document.getElementById('dataLancamento').value = hoje;
                 }
+                
                 limparCamposProduto();
                 
                 setTimeout(() => {
@@ -292,7 +304,6 @@
         }
 
         function calcularLucro() {
-            // Agora a quantidade puxa o que foi digitado, se estiver vazio calcula como 0
             const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
             const venda = parseFloat(document.getElementById('precoVenda').value) || 0;
             const custo = parseFloat(document.getElementById('precoCusto').value) || 0;
