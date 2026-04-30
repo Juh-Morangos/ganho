@@ -10,7 +10,7 @@
         body { background-color: #f0f2f5; margin: 0; padding: 0; }
         header { background-color: #1a73e8; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        main { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        main { max-width: 1300px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
         
         .controles { display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; }
         .controles-acoes { display: flex; gap: 10px; }
@@ -26,15 +26,15 @@
         .btn-editar { background-color: #fbbc05; color: #333;}
         .btn-excluir { background-color: #ea4335; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+        th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 11px; }
 
-        .chk-col { text-align: center; width: 40px; }
+        .chk-col { text-align: center; width: 30px; }
         input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
-        .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; width: 90%; max-width: 600px; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
+        .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; width: 90%; max-width: 650px; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
@@ -42,7 +42,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
         
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 13px; }
         .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
         .form-group input:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 5px rgba(26,115,232,0.3); }
         
@@ -53,7 +53,7 @@
         .detalhes-lucro { font-size: 13px; color: #5f6368; margin-bottom: 8px; font-weight: normal; }
 
         .manter-dados-container { grid-column: span 2; background: #f8f9fa; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 10px; border: 1px dashed #ccc; margin-bottom: 5px; }
-        .manter-dados-container input { width: auto; cursor: pointer; }
+        .manter-dados-container input { width: auto; cursor: pointer; margin: 0; }
 
         .lista-fornecedores { max-height: 200px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
         .item-fornecedor { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
@@ -69,8 +69,8 @@
     <main>
         <div class="controles">
             <div>
-                <label for="filtroData"><strong>Data de Consulta:</strong></label>
-                <input type="date" id="filtroData" onchange="renderizarTabela()">
+                <label for="filtroData" style="font-size: 14px;"><strong>Data de Consulta:</strong></label>
+                <input type="date" id="filtroData" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;" onchange="renderizarTabela()">
             </div>
             <div class="controles-acoes">
                 <button class="btn btn-imprimir" onclick="imprimirSelecionados()">🖨️ Imprimir Selecionados</button>
@@ -86,9 +86,11 @@
                     <th>Data</th>
                     <th>Fornecedor</th>
                     <th>Produto</th>
-                    <th>Qtd</th>
+                    <th style="text-align: center;">Qtd</th>
                     <th>Custo (Un)</th>
+                    <th>Custo Total</th>
                     <th>Venda (Un)</th>
+                    <th>Lucro Unit.</th>
                     <th>Gastos</th>
                     <th>Lucro Total</th>
                     <th>Ações</th>
@@ -101,7 +103,7 @@
     <div id="modalLancamento" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
-            <h2 id="tituloModalLancamento" style="margin-top: 0;">Lançar Item</h2>
+            <h2 id="tituloModalLancamento" style="margin-top: 0; color: #1a73e8;">Lançar Item</h2>
             
             <form id="formLancamento">
                 <input type="hidden" id="editIndex" value="">
@@ -121,7 +123,7 @@
 
                     <div class="form-group">
                         <label>Fornecedor (Cód ou Nome):</label>
-                        <input type="text" id="codFornecedor" class="campo-nav" placeholder="Digite e aperte Enter" onblur="buscarFornecedor()">
+                        <input type="text" id="codFornecedor" class="campo-nav" placeholder="Ex: Colméia (aperte Enter)" onblur="buscarFornecedor()">
                         <span class="info-busca" id="nomeFornecedor"></span>
                     </div>
 
@@ -147,7 +149,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Gastos Extras (Total) (R$):</label>
+                        <label>Gastos Extras (Total no Lote) (R$):</label>
                         <input type="number" id="gastos" class="campo-nav" step="0.01" value="0" oninput="calcularLucro()">
                     </div>
                 </div>
@@ -168,10 +170,10 @@
     <div id="modalFornecedores" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
-            <h2 style="margin-top: 0;">Cadastro de Fornecedores</h2>
+            <h2 style="margin-top: 0; color: #fbbc05;">Cadastro de Fornecedores</h2>
             <div class="form-grid">
-                <div class="form-group"><label>Código:</label><input type="text" id="novoCadCodigo"></div>
-                <div class="form-group"><label>Nome:</label><input type="text" id="novoCadNome"></div>
+                <div class="form-group"><label>Código:</label><input type="text" id="novoCadCodigo" placeholder="Ex: 1"></div>
+                <div class="form-group"><label>Nome:</label><input type="text" id="novoCadNome" placeholder="Ex: Colméia"></div>
             </div>
             <button class="btn btn-novo" style="width:100%; margin-top:10px;" onclick="salvarNovoFornecedor()">Gravar Fornecedor</button>
             <div class="lista-fornecedores" id="listaFornecedoresModal"></div>
@@ -227,7 +229,6 @@
             const form = document.getElementById('formLancamento');
             
             if (indexEdit !== null) {
-                // Modo Edição
                 document.getElementById('tituloModalLancamento').innerText = "Editar Lançamento";
                 document.getElementById('editIndex').value = indexEdit;
                 const item = lancamentos[indexEdit];
@@ -242,7 +243,6 @@
                 document.getElementById('gastos').value = item.gastos;
                 calcularLucro();
             } else {
-                // Modo Novo
                 document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
                 document.getElementById('editIndex').value = "";
                 
@@ -360,6 +360,7 @@
             document.getElementById('boxLucro').classList.remove('lucro-negativo');
         }
 
+        // TABELA PRINCIPAL ATUALIZADA COM CUSTO TOTAL E LUCRO UNITÁRIO
         function renderizarTabela() {
             const tbody = document.getElementById('listaItens');
             tbody.innerHTML = "";
@@ -368,8 +369,10 @@
 
             lancamentos.forEach((item, index) => {
                 if (item.dataRAW === filtro) {
-                    const qtd = item.qtd || 1; // Para manter compatibilidade com lançamentos antigos
-                    const lucroTotal = item.lucro; // Já está salvo como lucro total
+                    const qtd = item.qtd || 1; 
+                    const custoTotal = item.custo * qtd;
+                    const lucroUn = item.venda - item.custo;
+                    const lucroTotal = item.lucro;
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -377,14 +380,16 @@
                         <td>${item.dataBR}</td>
                         <td>${item.nomeFornecedor}</td>
                         <td>${item.nomeProduto}</td>
-                        <td style="font-weight: bold;">${qtd}</td>
+                        <td style="font-weight: bold; text-align: center;">${qtd}</td>
                         <td>R$ ${item.custo.toFixed(2)}</td>
+                        <td><strong>R$ ${custoTotal.toFixed(2)}</strong></td>
                         <td>R$ ${item.venda.toFixed(2)}</td>
+                        <td style="color:${lucroUn >= 0 ? '#34a853' : '#ea4335'};">R$ ${lucroUn.toFixed(2)}</td>
                         <td>R$ ${item.gastos.toFixed(2)}</td>
-                        <td style="color:${lucroTotal >= 0 ? '#34a853' : '#ea4335'}; font-weight:bold;">R$ ${lucroTotal.toFixed(2)}</td>
+                        <td style="color:${lucroTotal >= 0 ? '#34a853' : '#ea4335'}; font-weight:bold; font-size: 14px;">R$ ${lucroTotal.toFixed(2)}</td>
                         <td>
-                            <button class="btn-acao btn-editar" onclick="abrirModal(${index})">✎</button>
-                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${index})">✖</button>
+                            <button class="btn-acao btn-editar" onclick="abrirModal(${index})" title="Editar">✎</button>
+                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${index})" title="Excluir">✖</button>
                         </td>`;
                     tbody.appendChild(tr);
                 }
@@ -397,7 +402,7 @@
         }
 
         function excluirLancamento(i) {
-            if(confirm("Excluir item?")) { lancamentos.splice(i, 1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela(); }
+            if(confirm("Deseja realmente excluir este lançamento?")) { lancamentos.splice(i, 1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela(); }
         }
 
         function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display = "block"; renderizarListaFornecedores(); }
@@ -426,30 +431,56 @@
             renderizarListaFornecedores();
         }
 
+        // IMPRESSÃO ATUALIZADA
         function imprimirSelecionados() {
             const marcados = document.querySelectorAll('.chk-item:checked');
-            if(marcados.length === 0) return alert("Selecione pelo menos um lançamento.");
+            if(marcados.length === 0) return alert("Selecione pelo menos um lançamento na tabela.");
 
             const itensParaImprimir = Array.from(marcados).map(c => lancamentos[c.value]);
-            let t = `<table border="1" style="width:100%; border-collapse:collapse; text-align: left; font-family: sans-serif;">
+            let t = `<table border="1" style="width:100%; border-collapse:collapse; text-align: left; font-family: sans-serif; font-size: 13px;">
                 <thead><tr style="background-color: #eee;">
-                    <th style="padding: 8px;">Data</th><th style="padding: 8px;">Fornecedor</th><th style="padding: 8px;">Produto</th><th style="padding: 8px;">Qtd</th>
-                    <th style="padding: 8px;">Custo Un.</th><th style="padding: 8px;">Venda Un.</th><th style="padding: 8px;">Lucro Total</th>
+                    <th style="padding: 8px;">Data</th>
+                    <th style="padding: 8px;">Fornecedor</th>
+                    <th style="padding: 8px;">Produto</th>
+                    <th style="padding: 8px; text-align: center;">Qtd</th>
+                    <th style="padding: 8px;">Custo Un.</th>
+                    <th style="padding: 8px;">Custo Total</th>
+                    <th style="padding: 8px;">Venda Un.</th>
+                    <th style="padding: 8px;">Lucro Unit.</th>
+                    <th style="padding: 8px;">Lucro Total</th>
                 </tr></thead><tbody>`;
                 
-            let total = 0;
+            let somaLucroFinal = 0;
+            let somaCustoGeral = 0;
+
             itensParaImprimir.forEach(it => {
                 const qtd = it.qtd || 1;
-                total += it.lucro;
+                const custoTotal = it.custo * qtd;
+                const lucroUn = it.venda - it.custo;
+                
+                somaLucroFinal += it.lucro;
+                somaCustoGeral += custoTotal;
+
                 t += `<tr>
-                        <td style="padding: 8px;">${it.dataBR}</td><td style="padding: 8px;">${it.nomeFornecedor}</td><td style="padding: 8px;">${it.nomeProduto}</td>
-                        <td style="padding: 8px; font-weight:bold;">${qtd}</td>
-                        <td style="padding: 8px;">R$ ${it.custo.toFixed(2)}</td><td style="padding: 8px;">R$ ${it.venda.toFixed(2)}</td><td style="padding: 8px;">R$ ${it.lucro.toFixed(2)}</td>
+                        <td style="padding: 8px;">${it.dataBR}</td>
+                        <td style="padding: 8px;">${it.nomeFornecedor}</td>
+                        <td style="padding: 8px;">${it.nomeProduto}</td>
+                        <td style="padding: 8px; text-align: center; font-weight:bold;">${qtd}</td>
+                        <td style="padding: 8px;">R$ ${it.custo.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${custoTotal.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${it.venda.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${lucroUn.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${it.lucro.toFixed(2)}</td>
                       </tr>`;
             });
-            t += `</tbody></table><h3 style="font-family: sans-serif; text-align: right;">Lucro Total do Relatório: R$ ${total.toFixed(2)}</h3>`;
             
-            const win = window.open('', '', 'width=800,height=600');
+            t += `</tbody></table>
+            <div style="font-family: sans-serif; text-align: right; margin-top: 20px;">
+                <h4>Custo Total (Itens): R$ ${somaCustoGeral.toFixed(2)}</h4>
+                <h2 style="color: #34a853;">Lucro Total (Selecionados): R$ ${somaLucroFinal.toFixed(2)}</h2>
+            </div>`;
+            
+            const win = window.open('', '', 'width=900,height=600');
             win.document.write(`<html><body style="padding: 20px;"><h2 style="font-family: sans-serif; text-align: center;">Relatório de Lançamentos</h2>${t}</body></html>`);
             win.document.close();
             setTimeout(() => { win.print(); win.close(); }, 300);
