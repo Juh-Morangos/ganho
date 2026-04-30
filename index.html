@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Lançamentos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Controle de Lançamentos Diários</h1>
+    </header>
+
+    <main>
+        <div class="controles">
+            <div>
+                <label for="filtroData"><strong>Filtrar por Data:</strong></label>
+                <input type="date" id="filtroData">
+            </div>
+            <button class="btn-novo" onclick="abrirModal()">+ Novo Lançamento</button>
+        </div>
+
+        <table id="tabelaLancamentos">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Fornecedor</th>
+                    <th>Produto</th>
+                    <th>Custo</th>
+                    <th>Venda</th>
+                    <th>Gastos</th>
+                    <th>Lucro</th>
+                </tr>
+            </thead>
+            <tbody id="listaItens">
+                </tbody>
+        </table>
+    </main>
+
+    <div id="modalLancamento" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Novo Lançamento</h2>
+            
+            <form id="formLancamento">
+                <div class="form-group">
+                    <label>Data:</label>
+                    <input type="date" id="dataLancamento" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cód. Fornecedor:</label>
+                    <input type="text" id="codFornecedor" placeholder="Digite e saia do campo" onblur="buscarFornecedor()">
+                    <span class="info-busca" id="nomeFornecedor"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Cód. Produto:</label>
+                    <input type="text" id="codProduto" placeholder="Digite e saia do campo" onblur="buscarProduto()">
+                    <span class="info-busca" id="nomeProduto"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Preço Venda (Planilha):</label>
+                    <input type="number" id="precoVenda" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Preço de Custo (R$):</label>
+                    <input type="number" id="precoCusto" step="0.01" oninput="calcularLucro()">
+                </div>
+
+                <div class="form-group">
+                    <label>Gastos Extras (R$):</label>
+                    <input type="number" id="gastos" step="0.01" value="0" oninput="calcularLucro()">
+                </div>
+
+                <div class="resultado-lucro">
+                    Lucro Estimado: <strong>R$ <span id="valorLucro">0.00</span></strong>
+                </div>
+
+                <button type="button" class="btn-salvar" onclick="salvarLancamento()">Gravar Lançamento</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
