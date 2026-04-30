@@ -9,7 +9,6 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f2f5; margin: 0; padding: 0; }
         
-        /* Cabeçalho atualizado para comportar a Logo e ficar alinhado */
         header { background-color: #1a73e8; color: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
         
         main { max-width: 1300px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
@@ -66,13 +65,9 @@
 <body>
 
     <header>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-        </svg>
+        <img src="https://i.postimg.cc/Mp43sV46/LOGO-COLMEIA.png" alt="Logo da Empresa" style="height: 50px;">
 
-        <h1 style="margin: 0; font-size: 24px;">Sistema de Lançamentos</h1>
+        <h1 style="margin: 0; font-size: 24px;">COLMÉIA LANÇAMENTOS</h1>
     </header>
 
     <main>
@@ -203,7 +198,6 @@
 
         window.onload = () => {
             carregarProdutos();
-            // Inicia ambos os campos de filtro com a data de hoje
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('filtroDataInicio').value = hoje;
             document.getElementById('filtroDataFim').value = hoje;
@@ -259,7 +253,6 @@
                 
                 if(!document.getElementById('manterDados').checked) {
                     form.reset();
-                    // Agora puxa a data final do filtro como padrão de novo lançamento
                     document.getElementById('dataLancamento').value = document.getElementById('filtroDataFim').value;
                 }
                 limparCamposProduto();
@@ -368,14 +361,12 @@
             const tbody = document.getElementById('listaItens');
             tbody.innerHTML = "";
             
-            // Pega o filtro de período (se estiver vazio, joga uma data infinita para não bugar)
             const fInicio = document.getElementById('filtroDataInicio').value || '2000-01-01';
             const fFim = document.getElementById('filtroDataFim').value || '2100-12-31';
             
             document.getElementById('chkTodos').checked = false;
 
             lancamentos.forEach((item, index) => {
-                // Condição que verifica se a data do lançamento está DENTRO do período filtrado
                 if (item.dataRAW >= fInicio && item.dataRAW <= fFim) {
                     const qtd = item.qtd || 1; 
                     const custoTotal = item.custo * qtd;
@@ -440,7 +431,7 @@
         }
 
         // ===============================================
-        // NOVO DESIGN DO RELATÓRIO DE IMPRESSÃO
+        // IMPRESSÃO ALINHADA (SEM QUEBRA DE LINHA NO R$)
         // ===============================================
         function imprimirSelecionados() {
             const marcados = document.querySelectorAll('.chk-item:checked');
@@ -448,23 +439,7 @@
 
             const itensParaImprimir = Array.from(marcados).map(c => lancamentos[c.value]);
             
-            // Relatório limpo: Sem bordas nas células de dados, apenas linhas finas dividindo e cabeçalho em negrito.
-            let t = `<table style="width:100%; border-collapse:collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #333;">
-                        <th style="padding: 10px 5px; font-weight: bold;">Data</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Fornecedor</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Produto</th>
-                        <th style="padding: 10px 5px; font-weight: bold; text-align: center;">Qtd</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Custo Un.</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Custo Total</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Venda Un.</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Lucro Unit.</th>
-                        <th style="padding: 10px 5px; font-weight: bold;">Lucro Total</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-                
+            let tbodyHTML = '';
             let somaLucroFinal = 0;
             let somaCustoGeral = 0;
 
@@ -476,39 +451,84 @@
                 somaLucroFinal += it.lucro;
                 somaCustoGeral += custoTotal;
 
-                // Linha de dados com peso normal e divisória bem suave
-                t += `<tr style="border-bottom: 1px solid #f1f3f4;">
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">${it.dataBR}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">${it.nomeFornecedor}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">${it.nomeProduto}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333; text-align: center;">${qtd}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">R$ ${it.custo.toFixed(2)}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">R$ ${custoTotal.toFixed(2)}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">R$ ${it.venda.toFixed(2)}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">R$ ${lucroUn.toFixed(2)}</td>
-                        <td style="padding: 8px 5px; font-weight: normal; color: #333;">R$ ${it.lucro.toFixed(2)}</td>
-                      </tr>`;
+                // A classe "nowrap" impede a quebra de linha nas colunas de dinheiro
+                tbodyHTML += `
+                    <tr>
+                        <td class="nowrap">${it.dataBR}</td>
+                        <td>${it.nomeFornecedor}</td>
+                        <td>${it.nomeProduto}</td>
+                        <td class="text-center">${qtd}</td>
+                        <td class="nowrap">R$ ${it.custo.toFixed(2)}</td>
+                        <td class="nowrap">R$ ${custoTotal.toFixed(2)}</td>
+                        <td class="nowrap">R$ ${it.venda.toFixed(2)}</td>
+                        <td class="nowrap">R$ ${lucroUn.toFixed(2)}</td>
+                        <td class="nowrap">R$ ${it.lucro.toFixed(2)}</td>
+                    </tr>
+                `;
             });
             
-            t += `</tbody></table>
-            
-            <div style="font-family: 'Segoe UI', Arial, sans-serif; text-align: right; margin-top: 30px; border-top: 2px solid #333; padding-top: 15px;">
-                <h4 style="margin: 0 0 8px 0; font-weight: normal; color: #555;">Custo Total (Itens): <strong>R$ ${somaCustoGeral.toFixed(2)}</strong></h4>
-                <h2 style="color: #137333; margin: 0;">Lucro Total (Selecionados): R$ ${somaLucroFinal.toFixed(2)}</h2>
-            </div>`;
-            
-            const win = window.open('', '', 'width=900,height=600');
-            win.document.write(`
+            // Construção do HTML para a nova janela (usando CSS dedicado para impressão)
+            const htmlImpressao = `
                 <html>
-                <body style="padding: 40px; color: #333;">
-                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 30px;">
-                        <h2 style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">Relatório de Lançamentos</h2>
+                <head>
+                    <title>Relatório de Lançamentos</title>
+                    <style>
+                        /* Força a impressão em modo Paisagem para dar bastante espaço */
+                        @media print {
+                            @page { size: landscape; margin: 15mm; }
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        }
+                        
+                        body { padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
+                        h2 { text-align: center; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
+                        
+                        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+                        th { border-bottom: 2px solid #333; padding: 10px 5px; font-weight: bold; white-space: nowrap; }
+                        td { border-bottom: 1px solid #ddd; padding: 8px 5px; color: #333; }
+                        
+                        /* A mágica que resolve a quebra do "R$": */
+                        .nowrap { white-space: nowrap; }
+                        .text-center { text-align: center; }
+                        
+                        .rodape { text-align: right; margin-top: 30px; border-top: 2px solid #333; padding-top: 15px; }
+                        .rodape h4 { margin: 0 0 8px 0; font-weight: normal; color: #555; }
+                        .rodape h2-lucro { color: #137333; margin: 0; font-size: 22px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Relatório de Lançamentos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Fornecedor</th>
+                                <th style="width: 30%; white-space: normal;">Produto</th>
+                                <th class="text-center">Qtd</th>
+                                <th>Custo Un.</th>
+                                <th>Custo Total</th>
+                                <th>Venda Un.</th>
+                                <th>Lucro Unit.</th>
+                                <th>Lucro Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tbodyHTML}
+                        </tbody>
+                    </table>
+                    
+                    <div class="rodape">
+                        <h4>Custo Total (Itens): <strong>R$ ${somaCustoGeral.toFixed(2)}</strong></h4>
+                        <div class="rodape h2-lucro" style="color: #137333; font-size: 22px; font-weight: bold;">Lucro Total (Selecionados): R$ ${somaLucroFinal.toFixed(2)}</div>
                     </div>
-                    ${t}
                 </body>
                 </html>
-            `);
+            `;
+            
+            const win = window.open('', '', 'width=1100,height=700');
+            win.document.write(htmlImpressao);
             win.document.close();
+            
+            // Pequeno delay para renderizar a janela antes de puxar a caixa de impressão
             setTimeout(() => { win.print(); win.close(); }, 300);
         }
     </script>
