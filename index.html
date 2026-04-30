@@ -10,35 +10,55 @@
         body { background-color: #f0f2f5; margin: 0; padding: 0; }
         header { background-color: #1a73e8; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        main { max-width: 1100px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        main { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        .controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; }
+        .controles { display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; }
+        .controles-acoes { display: flex; gap: 10px; }
         
-        .btn-novo { background-color: #34a853; color: white; border: none; padding: 12px 24px; font-size: 16px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn { border: none; padding: 10px 20px; font-size: 15px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; color: white; }
+        .btn-novo { background-color: #34a853; }
         .btn-novo:hover { background-color: #2d8e47; }
-        .btn-salvar { background-color: #1a73e8; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; cursor: pointer; border-radius: 6px; margin-top: 10px; }
+        .btn-fornecedor { background-color: #fbbc05; color: #333; }
+        .btn-fornecedor:hover { background-color: #e0a800; }
+        .btn-imprimir { background-color: #6c757d; }
+        .btn-imprimir:hover { background-color: #5a6268; }
+        .btn-salvar { background-color: #1a73e8; width: 100%; padding: 12px; margin-top: 10px; }
+        .btn-salvar:hover { background-color: #1557b0; }
+        .btn-acao { padding: 5px 10px; font-size: 13px; margin-right: 5px; border-radius: 4px; border: none; cursor: pointer; color: white;}
+        .btn-editar { background-color: #fbbc05; color: #333;}
+        .btn-excluir { background-color: #ea4335; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 12px; }
         tr:hover { background-color: #fcfcfc; }
 
-        /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; }
-        .modal-content { background-color: #fff; margin: 2% auto; padding: 30px; width: 90%; max-width: 500px; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
+        /* Modais */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
+        .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; width: 90%; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
+        .modal-lancamento { max-width: 600px; }
+        .modal-fornecedor { max-width: 500px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
+        /* Grid para o formulário ficar compacto (2 colunas) */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 14px; }
+        .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
         .form-group input[readonly] { background-color: #f1f3f4; outline: none; }
         
-        .info-busca { display: block; font-size: 13px; color: #1a73e8; margin-top: 4px; min-height: 18px; font-weight: 500; }
+        .info-busca { display: block; font-size: 12px; color: #1a73e8; margin-top: 4px; min-height: 16px; font-weight: 500; }
         
-        .resultado-lucro { background-color: #e6f4ea; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 5px solid #34a853; font-size: 18px; }
+        .resultado-lucro { background-color: #e6f4ea; padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 5px solid #34a853; font-size: 16px; text-align: center; }
         .lucro-negativo { background-color: #fce8e6; border-left-color: #ea4335; }
+
+        /* Lista de fornecedores dentro do modal */
+        .lista-fornecedores { max-height: 200px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .item-fornecedor { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
+        .item-fornecedor button { background: none; border: none; color: #ea4335; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -51,9 +71,13 @@
         <div class="controles">
             <div>
                 <label for="filtroData"><strong>Data de Consulta:</strong></label>
-                <input type="date" id="filtroData">
+                <input type="date" id="filtroData" onchange="renderizarTabela()">
             </div>
-            <button class="btn-novo" onclick="abrirModal()">+ Novo Lançamento</button>
+            <div class="controles-acoes">
+                <button class="btn btn-imprimir" onclick="imprimirRelatorio()">🖨️ Imprimir Dia</button>
+                <button class="btn btn-fornecedor" onclick="abrirModalFornecedor()">👥 Fornecedores</button>
+                <button class="btn btn-novo" onclick="abrirModal(null)">+ Novo Lançamento</button>
+            </div>
         </div>
 
         <table id="tabelaLancamentos">
@@ -66,6 +90,7 @@
                     <th>Venda</th>
                     <th>Gastos</th>
                     <th>Lucro</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody id="listaItens">
@@ -74,71 +99,98 @@
     </main>
 
     <div id="modalLancamento" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModal()">&times;</span>
-            <h2 style="margin-top: 0;">Lançar Item</h2>
+        <div class="modal-content modal-lancamento">
+            <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
+            <h2 id="tituloModalLancamento" style="margin-top: 0;">Lançar Item</h2>
             
             <form id="formLancamento">
-                <div class="form-group">
-                    <label>Data:</label>
-                    <input type="date" id="dataLancamento" required>
+                <input type="hidden" id="editIndex" value=""> <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Data:</label>
+                        <input type="date" id="dataLancamento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cód. Fornecedor:</label>
+                        <input type="text" id="codFornecedor" placeholder="Ex: 1" onblur="buscarFornecedor()">
+                        <span class="info-busca" id="nomeFornecedor"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cód. Produto (Planilha):</label>
+                        <input type="text" id="codProduto" placeholder="Digite o código" onblur="buscarProduto()">
+                        <span class="info-busca" id="nomeProduto"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preço Venda (Coluna E):</label>
+                        <input type="number" id="precoVenda" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preço de Custo (R$):</label>
+                        <input type="number" id="precoCusto" step="0.01" oninput="calcularLucro()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gastos Extras (R$):</label>
+                        <input type="number" id="gastos" step="0.01" value="0" oninput="calcularLucro()">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Cód. Fornecedor:</label>
-                    <input type="text" id="codFornecedor" placeholder="Ex: 1" onblur="buscarFornecedor()">
-                    <span class="info-busca" id="nomeFornecedor"></span>
-                </div>
-
-                <div class="form-group">
-                    <label>Cód. Produto (Planilha):</label>
-                    <input type="text" id="codProduto" placeholder="Digite o código" onblur="buscarProduto()">
-                    <span class="info-busca" id="nomeProduto"></span>
-                </div>
-
-                <div class="form-group">
-                    <label>Preço Venda (Coluna E):</label>
-                    <input type="number" id="precoVenda" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Preço de Custo (R$):</label>
-                    <input type="number" id="precoCusto" step="0.01" oninput="calcularLucro()">
-                </div>
-
-                <div class="form-group">
-                    <label>Gastos Extras (R$):</label>
-                    <input type="number" id="gastos" step="0.01" value="0" oninput="calcularLucro()">
-                </div>
-
-                <div id="boxLucro" class="resultado-lucro">
+                <div id="boxLucro" class="resultado-lucro full-width">
                     Lucro: <strong>R$ <span id="valorLucro">0.00</span></strong>
                 </div>
 
-                <button type="button" class="btn-salvar" onclick="salvarLancamento()">Confirmar Lançamento</button>
+                <button type="button" class="btn btn-salvar" onclick="salvarLancamento()">Confirmar Lançamento</button>
             </form>
         </div>
     </div>
 
+    <div id="modalFornecedores" class="modal">
+        <div class="modal-content modal-fornecedor">
+            <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
+            <h2 style="margin-top: 0;">Cadastro de Fornecedores</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Código:</label>
+                    <input type="text" id="novoCadCodigo" placeholder="Ex: 10">
+                </div>
+                <div class="form-group">
+                    <label>Nome do Fornecedor:</label>
+                    <input type="text" id="novoCadNome" placeholder="Ex: Distribuidora X">
+                </div>
+            </div>
+            <button class="btn btn-novo" style="width: 100%; margin-top: 10px;" onclick="salvarNovoFornecedor()">Adicionar Fornecedor</button>
+
+            <div class="lista-fornecedores" id="listaFornecedoresModal">
+                </div>
+        </div>
+    </div>
+
     <script>
-        // ID da sua planilha extraído do link fornecido
+        // Configurações da API Planilha Google
         const PLANILHA_ID = '1cl89xjWPjxyULh4Jw5XZc89uO057pDPaivUKSCiy-xM';
-        // URL da API buscando Colunas A (Código), B (Produto) e E (Preço)
         const URL_DADOS = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, E`;
 
+        // Estado do aplicativo (Salvo no LocalStorage do navegador)
         let listaProdutos = [];
+        let fornecedoresCadastrados = JSON.parse(localStorage.getItem('fornecedores')) || [];
+        let lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
 
-        // Mock de fornecedores (Pode ser outra planilha no futuro)
-        const fornecedoresCadastrados = [
-            { id: "1", nome: "Fornecedor Exemplo A" },
-            { id: "2", nome: "Fornecedor Exemplo B" }
-        ];
+        // Inicialização
+        window.onload = () => {
+            carregarProdutos();
+            document.getElementById('filtroData').value = new Date().toISOString().split('T')[0];
+            renderizarTabela();
+        };
 
+        // --- Google Sheets (Produtos) ---
         async function carregarProdutos() {
             try {
                 const response = await fetch(URL_DADOS);
                 const text = await response.text();
-                // Limpeza do retorno JSONP do Google
                 const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
                 
                 listaProdutos = json.table.rows.map(row => ({
@@ -146,34 +198,49 @@
                     nome: row.c[1] ? row.c[1].v : '',
                     preco: row.c[2] ? parseFloat(row.c[2].v) : 0
                 }));
-                console.log("Produtos carregados:", listaProdutos.length);
             } catch (e) {
                 console.error("Erro ao carregar planilha:", e);
-                alert("Erro ao carregar dados da planilha. Verifique se ela está compartilhada como 'Qualquer pessoa com o link'.");
+                alert("Atenção: Não foi possível carregar os produtos do Google Sheets.");
             }
         }
 
-        window.onload = () => {
-            carregarProdutos();
-            document.getElementById('filtroData').value = new Date().toISOString().split('T')[0];
-        };
+        // --- Controle de Modais ---
+        function fecharModal(idModal) {
+            document.getElementById(idModal).style.display = "none";
+        }
 
-        function abrirModal() {
+        // --- Lógica de Lançamentos ---
+        function abrirModal(indexEdit = null) {
             document.getElementById('modalLancamento').style.display = "block";
-            document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
-        }
-
-        function fecharModal() {
-            document.getElementById('modalLancamento').style.display = "none";
-            document.getElementById('formLancamento').reset();
-            document.getElementById('nomeFornecedor').innerText = "";
-            document.getElementById('nomeProduto').innerText = "";
-        }
-
-        function buscarFornecedor() {
-            const cod = document.getElementById('codFornecedor').value;
-            const f = fornecedoresCadastrados.find(item => item.id === cod);
-            document.getElementById('nomeFornecedor').innerText = f ? f.nome : "Não cadastrado";
+            const form = document.getElementById('formLancamento');
+            
+            if (indexEdit !== null) {
+                // Modo Edição
+                document.getElementById('tituloModalLancamento').innerText = "Editar Lançamento";
+                document.getElementById('editIndex').value = indexEdit;
+                
+                const item = lancamentos[indexEdit];
+                document.getElementById('dataLancamento').value = item.dataRAW;
+                document.getElementById('codFornecedor').value = item.codFornecedor;
+                document.getElementById('nomeFornecedor').innerText = item.nomeFornecedor;
+                document.getElementById('codProduto').value = item.codProduto;
+                document.getElementById('nomeProduto').innerText = item.nomeProduto;
+                document.getElementById('precoVenda').value = item.venda;
+                document.getElementById('precoCusto').value = item.custo;
+                document.getElementById('gastos').value = item.gastos;
+                
+                calcularLucro();
+            } else {
+                // Modo Novo Lançamento
+                document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
+                form.reset();
+                document.getElementById('editIndex').value = "";
+                document.getElementById('dataLancamento').value = document.getElementById('filtroData').value;
+                document.getElementById('nomeFornecedor').innerText = "";
+                document.getElementById('nomeProduto').innerText = "";
+                document.getElementById('valorLucro').innerText = "0.00";
+                document.getElementById('boxLucro').classList.remove('lucro-negativo');
+            }
         }
 
         function buscarProduto() {
@@ -195,42 +262,209 @@
             const gastos = parseFloat(document.getElementById('gastos').value) || 0;
             const lucro = venda - custo - gastos;
             
-            const spanLucro = document.getElementById('valorLucro');
-            const boxLucro = document.getElementById('boxLucro');
-            
-            spanLucro.innerText = lucro.toFixed(2);
-            
+            document.getElementById('valorLucro').innerText = lucro.toFixed(2);
             if(lucro < 0) {
-                boxLucro.classList.add('lucro-negativo');
+                document.getElementById('boxLucro').classList.add('lucro-negativo');
             } else {
-                boxLucro.classList.remove('lucro-negativo');
+                document.getElementById('boxLucro').classList.remove('lucro-negativo');
             }
         }
 
         function salvarLancamento() {
             const data = document.getElementById('dataLancamento').value;
-            const produto = document.getElementById('nomeProduto').innerText;
-            const lucro = document.getElementById('valorLucro').innerText;
+            const codProduto = document.getElementById('codProduto').value;
+            const produtoNome = document.getElementById('nomeProduto').innerText;
 
-            if (!data || produto === "Produto não encontrado" || produto === "") {
-                alert("Verifique os campos obrigatórios.");
+            if (!data || produtoNome === "Produto não encontrado" || produtoNome === "") {
+                alert("Verifique os campos de data e código do produto.");
                 return;
             }
 
+            const novoLancamento = {
+                dataRAW: data,
+                dataBR: data.split('-').reverse().join('/'),
+                codFornecedor: document.getElementById('codFornecedor').value,
+                nomeFornecedor: document.getElementById('nomeFornecedor').innerText,
+                codProduto: codProduto,
+                nomeProduto: produtoNome,
+                custo: parseFloat(document.getElementById('precoCusto').value || 0),
+                venda: parseFloat(document.getElementById('precoVenda').value || 0),
+                gastos: parseFloat(document.getElementById('gastos').value || 0),
+                lucro: parseFloat(document.getElementById('valorLucro').innerText)
+            };
+
+            const editIndex = document.getElementById('editIndex').value;
+
+            if (editIndex !== "") {
+                // Atualiza existente
+                lancamentos[editIndex] = novoLancamento;
+            } else {
+                // Cria novo no topo
+                lancamentos.unshift(novoLancamento);
+            }
+
+            // Salva no navegador e atualiza tela
+            localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+            fecharModal('modalLancamento');
+            renderizarTabela();
+        }
+
+        function renderizarTabela() {
             const tbody = document.getElementById('listaItens');
-            const row = tbody.insertRow(0); // Adiciona no topo da lista
+            tbody.innerHTML = "";
+            const dataFiltro = document.getElementById('filtroData').value;
+
+            lancamentos.forEach((item, index) => {
+                // Só mostra itens da data selecionada
+                if (item.dataRAW === dataFiltro) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.dataBR}</td>
+                        <td>${item.nomeFornecedor || '-'}</td>
+                        <td>${item.nomeProduto}</td>
+                        <td>R$ ${item.custo.toFixed(2)}</td>
+                        <td>R$ ${item.venda.toFixed(2)}</td>
+                        <td>R$ ${item.gastos.toFixed(2)}</td>
+                        <td style="color: ${item.lucro >= 0 ? '#34a853' : '#ea4335'}; font-weight: bold;">R$ ${item.lucro.toFixed(2)}</td>
+                        <td>
+                            <button class="btn-acao btn-editar" onclick="abrirModal(${index})">✎ Editar</button>
+                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${index})">✖ Excluir</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function excluirLancamento(index) {
+            if(confirm("Tem certeza que deseja excluir este lançamento?")) {
+                lancamentos.splice(index, 1);
+                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+                renderizarTabela();
+            }
+        }
+
+        // --- Lógica de Fornecedores ---
+        function abrirModalFornecedor() {
+            document.getElementById('modalFornecedores').style.display = "block";
+            renderizarListaFornecedores();
+        }
+
+        function buscarFornecedor() {
+            const cod = document.getElementById('codFornecedor').value;
+            const f = fornecedoresCadastrados.find(item => item.id === cod);
+            document.getElementById('nomeFornecedor').innerText = f ? f.nome : "Não cadastrado";
+        }
+
+        function salvarNovoFornecedor() {
+            const id = document.getElementById('novoCadCodigo').value;
+            const nome = document.getElementById('novoCadNome').value;
+
+            if(!id || !nome) { alert("Preencha código e nome do fornecedor."); return; }
+            if(fornecedoresCadastrados.find(f => f.id === id)) { alert("Já existe um fornecedor com este código."); return; }
+
+            fornecedoresCadastrados.push({ id: id, nome: nome });
+            localStorage.setItem('fornecedores', JSON.stringify(fornecedoresCadastrados));
             
-            row.innerHTML = `
-                <td>${data.split('-').reverse().join('/')}</td>
-                <td>${document.getElementById('nomeFornecedor').innerText}</td>
-                <td>${produto}</td>
-                <td>R$ ${parseFloat(document.getElementById('precoCusto').value || 0).toFixed(2)}</td>
-                <td>R$ ${parseFloat(document.getElementById('precoVenda').value || 0).toFixed(2)}</td>
-                <td>R$ ${parseFloat(document.getElementById('gastos').value || 0).toFixed(2)}</td>
-                <td style="color: ${lucro >= 0 ? '#34a853' : '#ea4335'}; font-weight: bold;">R$ ${lucro}</td>
+            document.getElementById('novoCadCodigo').value = "";
+            document.getElementById('novoCadNome').value = "";
+            renderizarListaFornecedores();
+            buscarFornecedor(); // Atualiza caso estivesse preenchendo o lançamento
+        }
+
+        function renderizarListaFornecedores() {
+            const div = document.getElementById('listaFornecedoresModal');
+            div.innerHTML = "";
+            if (fornecedoresCadastrados.length === 0) {
+                div.innerHTML = "<p style='color:#777; font-size:14px;'>Nenhum fornecedor cadastrado.</p>";
+                return;
+            }
+
+            fornecedoresCadastrados.forEach((f, index) => {
+                div.innerHTML += `
+                    <div class="item-fornecedor">
+                        <span><strong>${f.id}</strong> - ${f.nome}</span>
+                        <button onclick="excluirFornecedor(${index})">Excluir</button>
+                    </div>
+                `;
+            });
+        }
+
+        function excluirFornecedor(index) {
+            if(confirm("Excluir este fornecedor?")) {
+                fornecedoresCadastrados.splice(index, 1);
+                localStorage.setItem('fornecedores', JSON.stringify(fornecedoresCadastrados));
+                renderizarListaFornecedores();
+            }
+        }
+
+        // --- Lógica de Impressão ---
+        function imprimirRelatorio() {
+            const dataFiltro = document.getElementById('filtroData').value;
+            const dataBR = dataFiltro.split('-').reverse().join('/');
+            
+            const itensParaImprimir = lancamentos.filter(item => item.dataRAW === dataFiltro);
+            
+            if (itensParaImprimir.length === 0) {
+                alert("Nenhum lançamento para imprimir nesta data.");
+                return;
+            }
+
+            let htmlTabela = `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif;">
+                    <thead>
+                        <tr style="background-color: #eee;">
+                            <th style="padding: 8px; border: 1px solid #ccc;">Data</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Fornecedor</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Produto</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Custo</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Venda</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Lucro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
 
-            fecharModal();
+            let totalLucro = 0;
+
+            itensParaImprimir.forEach(item => {
+                totalLucro += item.lucro;
+                htmlTabela += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ccc;">${item.dataBR}</td>
+                        <td style="padding: 8px; border: 1px solid #ccc;">${item.nomeFornecedor}</td>
+                        <td style="padding: 8px; border: 1px solid #ccc;">${item.nomeProduto}</td>
+                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.custo.toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.venda.toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #ccc;">R$ ${item.lucro.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            htmlTabela += `
+                    </tbody>
+                </table>
+                <h3 style="text-align: right; font-family: sans-serif; margin-top: 20px;">
+                    Lucro Total do Dia: R$ ${totalLucro.toFixed(2)}
+                </h3>
+            `;
+
+            const janelaImpressao = window.open('', '', 'width=800,height=600');
+            janelaImpressao.document.write(`
+                <html>
+                <head>
+                    <title>Relatório Diário - ${dataBR}</title>
+                </head>
+                <body style="padding: 20px;">
+                    <h2 style="font-family: sans-serif; text-align: center;">Relatório de Lançamentos - ${dataBR}</h2>
+                    ${htmlTabela}
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            janelaImpressao.document.close();
         }
     </script>
 </body>
