@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLMÉIA LANÇAMENTOS</title>
+    <title>LANÇAMENTOS COLMÉIA</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -180,10 +180,10 @@
             <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
             <h2 style="margin-top: 0; color: #fbbc05;">Cadastro de Fornecedores</h2>
             <div class="form-grid">
-                <div class="form-group"><label>Código:</label><input type="text" id="novoCadCodigo" placeholder="Ex: 1"></div>
-                <div class="form-group"><label>Nome:</label><input type="text" id="novoCadNome" placeholder="Ex: Colméia"></div>
+                <div class="form-group"><label>Código:</label><input type="text" id="novoCadCodigo" class="campo-nav-forn" placeholder="Ex: 1"></div>
+                <div class="form-group"><label>Nome:</label><input type="text" id="novoCadNome" class="campo-nav-forn" placeholder="Ex: Colméia"></div>
             </div>
-            <button class="btn btn-novo" style="width:100%; margin-top:10px;" onclick="salvarNovoFornecedor()">Gravar Fornecedor</button>
+            <button class="btn btn-novo campo-nav-forn" style="width:100%; margin-top:10px;" onclick="salvarNovoFornecedor()">Gravar Fornecedor</button>
             <div class="lista-fornecedores" id="listaFornecedoresModal"></div>
         </div>
     </div>
@@ -200,23 +200,30 @@
             carregarProdutos();
             const hoje = new Date().toISOString().split('T')[0];
             
-            // Popula os filtros da tela inicial
             document.getElementById('filtroDataInicio').value = hoje;
             document.getElementById('filtroDataFim').value = hoje;
-            
-            // Garante que o campo do modal já inicie com a data de hoje carregada
             document.getElementById('dataLancamento').value = hoje;
             
             renderizarTabela();
         };
 
+        // Inteligência do ENTER aprimorada para funcionar nos dois modais
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && document.getElementById('modalLancamento').style.display === 'block') {
-                event.preventDefault(); 
-                const focusableElements = Array.from(document.querySelectorAll('.campo-nav'));
-                const index = focusableElements.indexOf(document.activeElement);
-                if (index > -1 && index < focusableElements.length - 1) focusableElements[index + 1].focus();
-                else if (index === focusableElements.length - 1) salvarLancamento();
+            if (event.key === 'Enter') {
+                if (document.getElementById('modalLancamento').style.display === 'block') {
+                    event.preventDefault(); 
+                    const focusableElements = Array.from(document.querySelectorAll('.campo-nav'));
+                    const index = focusableElements.indexOf(document.activeElement);
+                    if (index > -1 && index < focusableElements.length - 1) focusableElements[index + 1].focus();
+                    else if (index === focusableElements.length - 1) salvarLancamento();
+                } 
+                else if (document.getElementById('modalFornecedores').style.display === 'block') {
+                    event.preventDefault(); 
+                    const focusableElements = Array.from(document.querySelectorAll('.campo-nav-forn'));
+                    const index = focusableElements.indexOf(document.activeElement);
+                    if (index > -1 && index < focusableElements.length - 1) focusableElements[index + 1].focus();
+                    else if (index === focusableElements.length - 1) salvarNovoFornecedor();
+                }
             }
         });
 
@@ -258,12 +265,10 @@
                 document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
                 document.getElementById('editIndex').value = "";
                 
-                // Se NÃO for modo contínuo, zera tudo e coloca a data de hoje
                 if(!document.getElementById('manterDados').checked) {
                     form.reset();
                     document.getElementById('dataLancamento').value = hoje;
                 } 
-                // Se FOR modo contínuo, mas a data estiver em branco (por algum motivo), coloca a data de hoje
                 else if (document.getElementById('dataLancamento').value === "") {
                     document.getElementById('dataLancamento').value = hoje;
                 }
@@ -360,7 +365,7 @@
         function limparCamposProduto() {
             document.getElementById('codProduto').value = "";
             document.getElementById('nomeProduto').innerText = "";
-            document.getElementById('quantidade').value = ""; // Garante que fique vazio para o próximo
+            document.getElementById('quantidade').value = ""; 
             document.getElementById('precoVenda').value = "";
             document.getElementById('precoCusto').value = "";
             document.getElementById('gastos').value = "0";
@@ -417,7 +422,12 @@
             if(confirm("Deseja realmente excluir este lançamento?")) { lancamentos.splice(i, 1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela(); }
         }
 
-        function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display = "block"; renderizarListaFornecedores(); }
+        function abrirModalFornecedor() { 
+            document.getElementById('modalFornecedores').style.display = "block"; 
+            renderizarListaFornecedores(); 
+            // Foca automaticamente no campo de código ao abrir
+            setTimeout(() => document.getElementById('novoCadCodigo').focus(), 50);
+        }
         
         function salvarNovoFornecedor() {
             const id = document.getElementById('novoCadCodigo').value;
@@ -428,6 +438,9 @@
             document.getElementById('novoCadCodigo').value = "";
             document.getElementById('novoCadNome').value = "";
             renderizarListaFornecedores();
+            
+            // Retorna o foco para o campo de código para cadastrar o próximo
+            document.getElementById('novoCadCodigo').focus();
         }
 
         function renderizarListaFornecedores() {
