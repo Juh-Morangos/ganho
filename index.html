@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Lançamentos - Modo Contínuo</title>
+    <title>Sistema de Lançamentos</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -30,6 +30,10 @@
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 12px; }
 
+        /* Estilo para as caixinhas de seleção */
+        .chk-col { text-align: center; width: 40px; }
+        input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
         .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; width: 90%; border-radius: 12px; position: relative; animation: fadeIn 0.3s; }
         .modal-lancamento { max-width: 600px; }
@@ -42,24 +46,15 @@
         
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 14px; }
         .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
-        .form-group input[readonly] { background-color: #f1f3f4; outline: none; }
+        .form-group input:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 5px rgba(26,115,232,0.3); }
         
         .info-busca { display: block; font-size: 12px; color: #1a73e8; margin-top: 4px; min-height: 16px; font-weight: 500; }
         
         .resultado-lucro { background-color: #e6f4ea; padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 5px solid #34a853; font-size: 16px; text-align: center; }
         .lucro-negativo { background-color: #fce8e6; border-left-color: #ea4335; }
 
-        /* Estilo para a opção de manter dados */
         .manter-dados-container {
-            grid-column: span 2;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px dashed #ccc;
-            margin-bottom: 5px;
+            grid-column: span 2; background: #f8f9fa; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 10px; border: 1px dashed #ccc; margin-bottom: 5px;
         }
         .manter-dados-container input { width: auto; cursor: pointer; }
 
@@ -81,7 +76,7 @@
                 <input type="date" id="filtroData" onchange="renderizarTabela()">
             </div>
             <div class="controles-acoes">
-                <button class="btn btn-imprimir" onclick="imprimirRelatorio()">🖨️ Imprimir Dia</button>
+                <button class="btn btn-imprimir" onclick="imprimirSelecionados()">🖨️ Imprimir Selecionados</button>
                 <button class="btn btn-fornecedor" onclick="abrirModalFornecedor()">👥 Fornecedores</button>
                 <button class="btn btn-novo" onclick="abrirModal(null)">+ Novo Lançamento</button>
             </div>
@@ -90,6 +85,9 @@
         <table id="tabelaLancamentos">
             <thead>
                 <tr>
+                    <th class="chk-col">
+                        <input type="checkbox" id="chkTodos" onchange="selecionarTodos()">
+                    </th>
                     <th>Data</th>
                     <th>Fornecedor</th>
                     <th>Produto</th>
@@ -122,34 +120,34 @@
 
                     <div class="form-group full-width">
                         <label>Data:</label>
-                        <input type="date" id="dataLancamento" required>
+                        <input type="date" id="dataLancamento" class="campo-nav" required>
                     </div>
 
                     <div class="form-group">
                         <label>Cód. Fornecedor:</label>
-                        <input type="text" id="codFornecedor" placeholder="Ex: 1" onblur="buscarFornecedor()">
+                        <input type="text" id="codFornecedor" class="campo-nav" placeholder="Ex: 1" onblur="buscarFornecedor()">
                         <span class="info-busca" id="nomeFornecedor"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Cód. Produto (Planilha):</label>
-                        <input type="text" id="codProduto" placeholder="Digite o código" onblur="buscarProduto()">
+                        <input type="text" id="codProduto" class="campo-nav" placeholder="Digite o código" onblur="buscarProduto()">
                         <span class="info-busca" id="nomeProduto"></span>
                     </div>
 
                     <div class="form-group">
-                        <label>Preço Venda (Coluna E):</label>
-                        <input type="number" id="precoVenda" readonly>
+                        <label>Preço Venda (R$):</label>
+                        <input type="number" id="precoVenda" class="campo-nav" step="0.01" oninput="calcularLucro()">
                     </div>
 
                     <div class="form-group">
                         <label>Preço de Custo (R$):</label>
-                        <input type="number" id="precoCusto" step="0.01" oninput="calcularLucro()">
+                        <input type="number" id="precoCusto" class="campo-nav" step="0.01" oninput="calcularLucro()">
                     </div>
 
                     <div class="form-group full-width">
                         <label>Gastos Extras (R$):</label>
-                        <input type="number" id="gastos" step="0.01" value="0" oninput="calcularLucro()">
+                        <input type="number" id="gastos" class="campo-nav" step="0.01" value="0" oninput="calcularLucro()">
                     </div>
                 </div>
 
@@ -157,7 +155,7 @@
                     Lucro: <strong>R$ <span id="valorLucro">0.00</span></strong>
                 </div>
 
-                <button type="button" class="btn btn-salvar" onclick="salvarLancamento()">Confirmar Lançamento</button>
+                <button type="button" class="btn btn-salvar campo-nav" onclick="salvarLancamento()">Confirmar Lançamento</button>
             </form>
         </div>
     </div>
@@ -188,6 +186,26 @@
             document.getElementById('filtroData').value = new Date().toISOString().split('T')[0];
             renderizarTabela();
         };
+
+        // ==========================================
+        // NAVEGAÇÃO COM TECLA ENTER
+        // ==========================================
+        document.addEventListener('keydown', function(event) {
+            // Verifica se o modal de lançamento está aberto e se a tecla apertada foi o Enter
+            if (event.key === 'Enter' && document.getElementById('modalLancamento').style.display === 'block') {
+                event.preventDefault(); // Evita recarregar a página
+                
+                // Pega todos os campos que têm a classe 'campo-nav' e não estão escondidos
+                const focusableElements = Array.from(document.querySelectorAll('.campo-nav'));
+                const index = focusableElements.indexOf(document.activeElement);
+                
+                if (index > -1 && index < focusableElements.length - 1) {
+                    focusableElements[index + 1].focus(); // Pula para o próximo
+                } else if (index === focusableElements.length - 1) {
+                    salvarLancamento(); // Se for o último (o botão Confirmar), ele salva
+                }
+            }
+        });
 
         async function carregarProdutos() {
             try {
@@ -224,12 +242,18 @@
             } else {
                 document.getElementById('tituloModalLancamento').innerText = "Lançar Item";
                 document.getElementById('editIndex').value = "";
-                // Ao abrir novo, só limpa produto se não for o primeiro do lote
                 if(!document.getElementById('manterDados').checked) {
                     form.reset();
                     document.getElementById('dataLancamento').value = document.getElementById('filtroData').value;
                 }
                 limparCamposProduto();
+                
+                // Dá foco automático na data se for limpar tudo, ou no produto se mantiver o cabeçalho
+                if(document.getElementById('codFornecedor').value !== "") {
+                    document.getElementById('codProduto').focus();
+                } else {
+                    document.getElementById('dataLancamento').focus();
+                }
             }
         }
 
@@ -238,7 +262,8 @@
             const p = listaProdutos.find(item => item.codigo === cod);
             if (p) {
                 document.getElementById('nomeProduto').innerText = p.nome;
-                document.getElementById('precoVenda').value = p.preco;
+                // Preenche o valor de venda, mas permite que o usuário edite depois
+                document.getElementById('precoVenda').value = p.preco; 
                 calcularLucro();
             } else {
                 document.getElementById('nomeProduto').innerText = "Produto não encontrado";
@@ -259,7 +284,7 @@
             const data = document.getElementById('dataLancamento').value;
             const produtoNome = document.getElementById('nomeProduto').innerText;
             if (!data || produtoNome === "Produto não encontrado" || produtoNome === "") {
-                alert("Preencha os dados corretamente."); return;
+                alert("Preencha os dados do produto corretamente."); return;
             }
 
             const novo = {
@@ -270,7 +295,7 @@
                 codProduto: document.getElementById('codProduto').value,
                 nomeProduto: produtoNome,
                 custo: parseFloat(document.getElementById('precoCusto').value || 0),
-                venda: parseFloat(document.getElementById('precoVenda').value || 0),
+                venda: parseFloat(document.getElementById('precoVenda').value || 0), // Pega o valor que estiver no campo (da planilha ou digitado)
                 gastos: parseFloat(document.getElementById('gastos').value || 0),
                 lucro: parseFloat(document.getElementById('valorLucro').innerText)
             };
@@ -282,7 +307,6 @@
             localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
             renderizarTabela();
 
-            // Lógica de Manter Fornecedor (Modo Contínuo)
             if (document.getElementById('manterDados').checked && editIndex === "") {
                 limparCamposProduto();
                 document.getElementById('codProduto').focus();
@@ -301,14 +325,24 @@
             document.getElementById('boxLucro').classList.remove('lucro-negativo');
         }
 
+        // ==========================================
+        // RENDERIZAR TABELA E SELEÇÃO
+        // ==========================================
         function renderizarTabela() {
             const tbody = document.getElementById('listaItens');
             tbody.innerHTML = "";
             const filtro = document.getElementById('filtroData').value;
+            
+            // Desmarca o botão "Selecionar Todos" ao atualizar a tabela
+            document.getElementById('chkTodos').checked = false;
+
             lancamentos.forEach((item, index) => {
                 if (item.dataRAW === filtro) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
+                        <td class="chk-col">
+                            <input type="checkbox" class="chk-item" value="${index}">
+                        </td>
                         <td>${item.dataBR}</td><td>${item.nomeFornecedor}</td><td>${item.nomeProduto}</td>
                         <td>R$ ${item.custo.toFixed(2)}</td><td>R$ ${item.venda.toFixed(2)}</td><td>R$ ${item.gastos.toFixed(2)}</td>
                         <td style="color:${item.lucro >= 0 ? '#34a853' : '#ea4335'}; font-weight:bold;">R$ ${item.lucro.toFixed(2)}</td>
@@ -319,6 +353,12 @@
                     tbody.appendChild(tr);
                 }
             });
+        }
+
+        function selecionarTodos() {
+            const marcar = document.getElementById('chkTodos').checked;
+            const caixas = document.querySelectorAll('.chk-item');
+            caixas.forEach(caixa => caixa.checked = marcar);
         }
 
         function excluirLancamento(i) {
@@ -354,23 +394,57 @@
             renderizarListaFornecedores();
         }
 
-        function imprimirRelatorio() {
-            const filtro = document.getElementById('filtroData').value;
-            const itens = lancamentos.filter(it => it.dataRAW === filtro);
-            if(itens.length === 0) return alert("Nada para imprimir hoje.");
+        // ==========================================
+        // IMPRIMIR APENAS ITENS SELECIONADOS
+        // ==========================================
+        function imprimirSelecionados() {
+            // Busca apenas os checkboxes que estão marcados
+            const marcados = document.querySelectorAll('.chk-item:checked');
             
-            let t = `<table border="1" style="width:100%; border-collapse:collapse;">
-                <thead><tr><th>Fornecedor</th><th>Produto</th><th>Custo</th><th>Venda</th><th>Lucro</th></tr></thead><tbody>`;
+            if(marcados.length === 0) {
+                alert("Selecione pelo menos um lançamento na tabela para imprimir.");
+                return;
+            }
+
+            // Mapeia os índices dos itens selecionados para a lista de objetos 'lancamentos'
+            const itensParaImprimir = Array.from(marcados).map(checkbox => lancamentos[checkbox.value]);
+            
+            let t = `<table border="1" style="width:100%; border-collapse:collapse; text-align: left; font-family: sans-serif;">
+                <thead>
+                    <tr style="background-color: #eee;">
+                        <th style="padding: 8px;">Data</th>
+                        <th style="padding: 8px;">Fornecedor</th>
+                        <th style="padding: 8px;">Produto</th>
+                        <th style="padding: 8px;">Custo</th>
+                        <th style="padding: 8px;">Venda</th>
+                        <th style="padding: 8px;">Lucro</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+                
             let total = 0;
-            itens.forEach(it => {
+            itensParaImprimir.forEach(it => {
                 total += it.lucro;
-                t += `<tr><td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td><td>R$ ${it.custo.toFixed(2)}</td><td>R$ ${it.venda.toFixed(2)}</td><td>R$ ${it.lucro.toFixed(2)}</td></tr>`;
+                t += `<tr>
+                        <td style="padding: 8px;">${it.dataBR}</td>
+                        <td style="padding: 8px;">${it.nomeFornecedor}</td>
+                        <td style="padding: 8px;">${it.nomeProduto}</td>
+                        <td style="padding: 8px;">R$ ${it.custo.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${it.venda.toFixed(2)}</td>
+                        <td style="padding: 8px;">R$ ${it.lucro.toFixed(2)}</td>
+                      </tr>`;
             });
-            t += `</tbody></table><h3>Lucro Total: R$ ${total.toFixed(2)}</h3>`;
+            t += `</tbody></table><h3 style="font-family: sans-serif; text-align: right;">Lucro dos Itens Selecionados: R$ ${total.toFixed(2)}</h3>`;
             
             const win = window.open('', '', 'width=800,height=600');
-            win.document.write(`<html><body><h2>Relatório ${filtro.split('-').reverse().join('/')}</h2>${t}</body></html>`);
-            win.print(); win.close();
+            win.document.write(`<html><body style="padding: 20px;"><h2 style="font-family: sans-serif; text-align: center;">Relatório de Lançamentos</h2>${t}</body></html>`);
+            win.document.close();
+            
+            // Pequeno delay para garantir que o navegador monte a tela antes de abrir a janela de impressão
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 300);
         }
     </script>
 </body>
