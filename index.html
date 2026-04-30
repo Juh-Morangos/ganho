@@ -65,9 +65,9 @@
 <body>
 
     <header>
-        <img src="https://i.postimg.cc/Mp43sV46/LOGO-COLMEIA.png" alt="Logo da Empresa" style="height: 50px;">
+        <img src="COLE_O_SEU_LINK_AQUI" alt="Logo da Empresa" style="height: 50px;">
 
-        <h1 style="margin: 0; font-size: 24px;">COLMÉIA LANÇAMENTOS</h1>
+        <h1 style="margin: 0; font-size: 24px;">Sistema de Lançamentos</h1>
     </header>
 
     <main>
@@ -143,7 +143,7 @@
 
                     <div class="form-group">
                         <label>Quantidade:</label>
-                        <input type="number" id="quantidade" class="campo-nav" value="1" min="1" oninput="calcularLucro()">
+                        <input type="number" id="quantidade" class="campo-nav" placeholder="Ex: 5" min="1" oninput="calcularLucro()">
                     </div>
 
                     <div class="form-group">
@@ -242,7 +242,7 @@
                 document.getElementById('nomeFornecedor').innerText = item.nomeFornecedor;
                 document.getElementById('codProduto').value = item.codProduto;
                 document.getElementById('nomeProduto').innerText = item.nomeProduto;
-                document.getElementById('quantidade').value = item.qtd || 1;
+                document.getElementById('quantidade').value = item.qtd || "";
                 document.getElementById('precoVenda').value = item.venda;
                 document.getElementById('precoCusto').value = item.custo;
                 document.getElementById('gastos').value = item.gastos;
@@ -253,7 +253,8 @@
                 
                 if(!document.getElementById('manterDados').checked) {
                     form.reset();
-                    document.getElementById('dataLancamento').value = document.getElementById('filtroDataFim').value;
+                    const hoje = new Date().toISOString().split('T')[0];
+                    document.getElementById('dataLancamento').value = hoje;
                 }
                 limparCamposProduto();
                 
@@ -291,7 +292,8 @@
         }
 
         function calcularLucro() {
-            const qtd = parseFloat(document.getElementById('quantidade').value) || 1;
+            // Agora a quantidade puxa o que foi digitado, se estiver vazio calcula como 0
+            const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
             const venda = parseFloat(document.getElementById('precoVenda').value) || 0;
             const custo = parseFloat(document.getElementById('precoCusto').value) || 0;
             const gastos = parseFloat(document.getElementById('gastos').value) || 0;
@@ -309,10 +311,10 @@
         function salvarLancamento() {
             const data = document.getElementById('dataLancamento').value;
             const produtoNome = document.getElementById('nomeProduto').innerText;
-            const qtd = parseFloat(document.getElementById('quantidade').value) || 1;
+            const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
 
             if (!data || produtoNome === "Produto não encontrado" || produtoNome === "" || qtd <= 0) {
-                alert("Preencha os dados do produto e a quantidade corretamente."); return;
+                alert("Preencha os dados do produto e digite uma quantidade válida."); return;
             }
 
             const novo = {
@@ -347,7 +349,7 @@
         function limparCamposProduto() {
             document.getElementById('codProduto').value = "";
             document.getElementById('nomeProduto').innerText = "";
-            document.getElementById('quantidade').value = "1";
+            document.getElementById('quantidade').value = ""; // Garante que fique vazio para o próximo
             document.getElementById('precoVenda').value = "";
             document.getElementById('precoCusto').value = "";
             document.getElementById('gastos').value = "0";
@@ -430,9 +432,6 @@
             renderizarListaFornecedores();
         }
 
-        // ===============================================
-        // IMPRESSÃO ALINHADA (SEM QUEBRA DE LINHA NO R$)
-        // ===============================================
         function imprimirSelecionados() {
             const marcados = document.querySelectorAll('.chk-item:checked');
             if(marcados.length === 0) return alert("Selecione pelo menos um lançamento na tabela.");
@@ -451,7 +450,6 @@
                 somaLucroFinal += it.lucro;
                 somaCustoGeral += custoTotal;
 
-                // A classe "nowrap" impede a quebra de linha nas colunas de dinheiro
                 tbodyHTML += `
                     <tr>
                         <td class="nowrap">${it.dataBR}</td>
@@ -467,13 +465,11 @@
                 `;
             });
             
-            // Construção do HTML para a nova janela (usando CSS dedicado para impressão)
             const htmlImpressao = `
                 <html>
                 <head>
                     <title>Relatório de Lançamentos</title>
                     <style>
-                        /* Força a impressão em modo Paisagem para dar bastante espaço */
                         @media print {
                             @page { size: landscape; margin: 15mm; }
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -486,7 +482,6 @@
                         th { border-bottom: 2px solid #333; padding: 10px 5px; font-weight: bold; white-space: nowrap; }
                         td { border-bottom: 1px solid #ddd; padding: 8px 5px; color: #333; }
                         
-                        /* A mágica que resolve a quebra do "R$": */
                         .nowrap { white-space: nowrap; }
                         .text-center { text-align: center; }
                         
@@ -528,7 +523,6 @@
             win.document.write(htmlImpressao);
             win.document.close();
             
-            // Pequeno delay para renderizar a janela antes de puxar a caixa de impressão
             setTimeout(() => { win.print(); win.close(); }, 300);
         }
     </script>
