@@ -4,7 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Lançamentos</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .controles {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-novo, .btn-salvar {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn-novo:hover, .btn-salvar:hover {
+            background-color: #219150;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ecf0f1;
+        }
+
+        /* Estilos do Modal (Pop-up) */
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .info-busca {
+            display: block;
+            font-size: 14px;
+            color: #2980b9;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .resultado-lucro {
+            background-color: #e8f8f5;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #1abc9c;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
 
@@ -51,13 +179,13 @@
 
                 <div class="form-group">
                     <label>Cód. Fornecedor:</label>
-                    <input type="text" id="codFornecedor" placeholder="Digite e saia do campo" onblur="buscarFornecedor()">
+                    <input type="text" id="codFornecedor" placeholder="Digite o código e clique fora" onblur="buscarFornecedor()">
                     <span class="info-busca" id="nomeFornecedor"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Cód. Produto:</label>
-                    <input type="text" id="codProduto" placeholder="Digite e saia do campo" onblur="buscarProduto()">
+                    <input type="text" id="codProduto" placeholder="Digite o código e clique fora" onblur="buscarProduto()">
                     <span class="info-busca" id="nomeProduto"></span>
                 </div>
 
@@ -85,6 +213,23 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <script>
+        // Substitua pelos dados da sua planilha real
+        const PLANILHA_ID = 'COLE_AQUI_O_ID_DA_PLANILHA'; 
+        const ABA_GID = 'COLE_AQUI_O_GID_DA_ABA';
+
+        let listaProdutos = [];
+
+        // Lista simulada de fornecedores
+        const mockFornecedores = [
+            { codigo: "1", nome: "Fornecedor Alpha" },
+            { codigo: "2", nome: "Fornecedor Beta" }
+        ];
+
+        async function carregarDadosDaPlanilha() {
+            // IMPORTANTE: Altere A, B, C para as colunas exatas da sua planilha (ex: Código, Nome, Valor)
+            const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, C&gid=${ABA_GID}`;
+
+            try {
+                const resposta = await fetch(url);
+                const texto =
