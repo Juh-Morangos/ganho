@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Lançamentos</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; margin: 0; padding: 0; }
+        header { background-color: #1a73e8; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        
+        .btn-voltar { position: absolute; left: 20px; top: 20px; background-color: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; }
+        .btn-voltar:hover { background-color: rgba(255,255,255,0.3); }
+
+        main { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .card h2 { margin: 0; font-size: 18px; color: #3c4043; display: flex; align-items: center; gap: 8px; }
+        
+        .lista-rank { list-style: none; padding: 0; margin: 0; }
+        .lista-rank li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
+        .lista-rank li:last-child { border-bottom: none; }
+        
+        .posicao { font-weight: bold; color: #1a73e8; width: 20px; }
+        .nome-produto { flex-grow: 1; padding: 0 10px; font-weight: 500; color: #333; }
+        .valor-destaque { font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 13px; }
+        
+        .bg-qtd { background-color: #e8f0fe; color: #1a73e8; }
+        .bg-lucro-alto { background-color: #e6f4ea; color: #137333; }
+        .bg-lucro-baixo { background-color: #fce8e6; color: #c5221f; }
+
+        .resumo-geral { background: linear-gradient(135deg, #1a73e8, #1557b0); color: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 4px 15px rgba(26,115,232,0.3); flex-wrap: wrap; gap: 15px;}
+        .resumo-item h3 { margin: 0; font-size: 14px; font-weight: normal; opacity: 0.9; }
+        .resumo-item p { margin: 5px 0 0 0; font-size: 24px; font-weight: bold; }
+
+        /* Faz o gráfico ocupar a linha inteira */
+        .card-grafico { grid-column: 1 / -1; }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; outline: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="btn-voltar">⬅ Voltar para Lançamentos</a>
+        <h1>📊 Dashboard de Desempenho</h1>
+    </header>
+
+    <main>
+        <div class="resumo-geral">
+            <div class="resumo-item">
+                <h3>Total de Lançamentos</h3>
+                <p id="totalLancamentos">0</p>
+            </div>
+            <div class="resumo-item">
+                <h3>Produtos Vendidos (Qtd)</h3>
+                <p id="totalProdutos">0</p>
+            </div>
+            <div class="resumo-item">
+                <h3>Lucro Total Acumulado</h3>
+                <p id="lucroTotal">R$ 0.00</p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <div class="card card-grafico">
+                <div class="card-header">
+                    <h2>📈 Evolução de Lucro</h2>
+                    <select id="filtroGrafico" onchange="atualizarGrafico()">
+                        <option value="7dias">Últimos 7 Dias</option>
+                        <option value="30dias">Últimos 30 Dias</option>
+                        <option value="mensal" selected>Mensal (Todos os meses)</option>
+                    </select>
+                </div>
+                <canvas id="graficoLucro" height="80"></canvas>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>📈 Mais Vendidos (Qtd)</h2></div>
+                <ul class="lista-rank" id="listaMaisVendidos"></ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>💰 Maior Margem de Lucro</h2></div>
+                <ul class="lista-rank" id="listaMaiorLucro"></ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>⚠️ Menor Lucro (Atenção)</h2></div>
+                <ul class="lista-rank" id="listaMenorLucro"></ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
+        let meuGrafico = null; // Variável para guardar o gráfico na memória
+
+        function gerarDashboard() {
+            if (lancamentos.length === 0) {
+                document.getElementById('listaMaisVendidos').innerHTML = "<li>Sem dados suficientes.</li>";
+                document.getElementById('listaMaiorLucro').innerHTML = "<li>Sem dados suficientes.</li>";
+                document.getElementById('listaMenorLucro').innerHTML = "<li>Sem dados suficientes.</li>";
+                return;
+            }
+
+            let totalQtd = 0;
+            let lucroTotalAcumulado = 0;
+            const relatorioProdutos = {};
+
+            lancamentos.forEach(item => {
+                const qtd = item.qtd || 1;
+                const lucro = item.lucro || 0;
+                const nome = item.nomeProduto;
+
+                totalQtd += qtd;
+                lucroTotalAcumulado += lucro;
+
+                if (!relatorioProdutos[nome]) {
+                    relatorioProdutos[nome] = { nome: nome, totalQtd: 0, totalLucro: 0 };
+                }
+
+                relatorioProdutos[nome].totalQtd += qtd;
+                relatorioProdutos[nome].totalLucro += lucro;
+            });
+
+            document.getElementById('totalLancamentos').innerText = lancamentos.length;
+            document.getElementById('totalProdutos').innerText = totalQtd;
+            document.getElementById('lucroTotal').innerText = `R$ ${lucroTotalAcumulado.toFixed(2)}`;
+
+            const listaAgregada = Object.values(relatorioProdutos);
+            const maisVendidos = [...listaAgregada].sort((a, b) => b.totalQtd - a.totalQtd).slice(0, 5);
+            const maiorLucro = [...listaAgregada].sort((a, b) => b.totalLucro - a.totalLucro).slice(0, 5);
+            const menorLucro = [...listaAgregada].sort((a, b) => a.totalLucro - b.totalLucro).slice(0, 5);
+
+            renderizarLista('listaMaisVendidos', maisVendidos, 'totalQtd', 'Un.', 'bg-qtd');
+            renderizarLista('listaMaiorLucro', maiorLucro, 'totalLucro', 'R$', 'bg-lucro-alto');
+            renderizarLista('listaMenorLucro', menorLucro, 'totalLucro', 'R$', 'bg-lucro-baixo');
+
+            // Renderiza o gráfico logo que a página carrega
+            atualizarGrafico();
+        }
+
+        function renderizarLista(idElemento, dados, propriedade, rotulo, classeCor) {
+            const lista = document.getElementById(idElemento);
+            lista.innerHTML = "";
+
+            dados.forEach((item, index) => {
+                let valorFormatado = item[propriedade];
+                valorFormatado = propriedade === 'totalLucro' ? `${rotulo} ${valorFormatado.toFixed(2)}` : `${valorFormatado} ${rotulo}`;
+
+                lista.innerHTML += `
+                    <li>
+                        <span class="posicao">${index + 1}º</span>
+                        <span class="nome-produto">${item.nome}</span>
+                        <span class="valor-destaque ${classeCor}">${valorFormatado}</span>
+                    </li>
+                `;
+            });
+        }
+
+        // ==========================================
+        // LÓGICA DO GRÁFICO (CHART.JS)
+        // ==========================================
+        function atualizarGrafico() {
+            if (lancamentos.length === 0) return;
+
+            const filtro = document.getElementById('filtroGrafico').value;
+            const ctx = document.getElementById('graficoLucro').getContext('2d');
+            
+            // Ordena os lançamentos por data (do mais antigo para o mais novo) para o gráfico não ficar bagunçado
+            const lancamentosOrdenados = [...lancamentos].sort((a, b) => new Date(a.dataRAW) - new Date(b.dataRAW));
+
+            let labels = [];
+            let dadosLucro = [];
+
+            if (filtro === 'mensal') {
+                const agrupado = {};
+                lancamentosOrdenados.forEach(item => {
+                    // T00:00:00 evita bugs de fuso horário no JavaScript
+                    const data = new Date(item.dataRAW + 'T00:00:00'); 
+                    // Ex: "Jan de 2026"
+                    const mesAno = data.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+                    agrupado[mesAno] = (agrupado[mesAno] || 0) + item.lucro;
+                });
+                labels = Object.keys(agrupado);
+                dadosLucro = Object.values(agrupado);
+            } 
+            else {
+                // Lógica para 7 ou 30 dias
+                const dias = filtro === '7dias' ? 7 : 30;
+                const hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                const limite = new Date(hoje);
+                limite.setDate(limite.getDate() - dias + 1);
+
+                const agrupado = {};
+                // Cria os dias vazios para o gráfico não pular os dias que não tiveram vendas
+                for(let d = new Date(limite); d <= hoje; d.setDate(d.getDate() + 1)) {
+                    const strData = d.toISOString().split('T')[0];
+                    agrupado[strData] = 0;
+                }
+
+                lancamentosOrdenados.forEach(item => {
+                    if(agrupado[item.dataRAW] !== undefined) {
+                        agrupado[item.dataRAW] += item.lucro;
+                    }
+                });
+
+                // Transforma o YYYY-MM-DD em DD/MM para ficar bonito na tela
+                labels = Object.keys(agrupado).map(dataRAW => dataRAW.split('-').reverse().slice(0,2).join('/')); 
+                dadosLucro = Object.values(agrupado);
+            }
+
+            // Destrói o gráfico antigo antes de desenhar o novo (se mudar o filtro)
+            if (meuGrafico) {
+                meuGrafico.destroy();
+            }
+
+            // Define as cores dinâmicas: verde para lucro, vermelho para prejuízo
+            const coresFundo = dadosLucro.map(valor => valor >= 0 ? 'rgba(52, 168, 83, 0.7)' : 'rgba(234, 67, 53, 0.7)');
+            const coresBorda = dadosLucro.map(valor => valor >= 0 ? 'rgb(52, 168, 83)' : 'rgb(234, 67, 53)');
+
+            // Configurações do Chart.js
+            meuGrafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Lucro Total (R$)',
+                        data: dadosLucro,
+                        backgroundColor: coresFundo,
+                        borderColor: coresBorda,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Lucro: R$ ' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return 'R$ ' + value; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = gerarDashboard;
+    </script>
+</body>
+</html>
