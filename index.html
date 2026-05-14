@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v8.7 - Correção Abacate</title>
+    <title>Sistema Colméia v8.8 - Fornecedores em Lista</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background-color: #f4f7f6; margin: 0; padding: 0; }
@@ -59,7 +59,7 @@
 
 <header>
     <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.7</h1>
+    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.8</h1>
 </header>
 
 <main>
@@ -116,8 +116,8 @@
                 <select id="loteComp" class="nav"></select>
             </div>
             <div class="form-group" style="grid-column: span 2;">
-                <label>Fornecedor (Cód ou Nome):</label>
-                <input type="text" id="loteFornBusca" class="nav" onblur="buscarFornecedor()">
+                <label>Fornecedor:</label>
+                <select id="loteForn" class="nav" onchange="buscarFornecedor()"></select>
                 <span id="labelForn" style="font-size:11px; color:#1a73e8; font-weight:bold; display:block; margin-top:2px;"></span>
             </div>
         </div>
@@ -210,14 +210,14 @@
         renderizarTabela();
     };
 
-    // Navegação Enter Corrigida (Previne disparos duplicados)
+    // Navegação Enter
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             const inputs = Array.from(document.querySelectorAll('.nav'));
             const idx = inputs.indexOf(document.activeElement);
             if(idx > -1) {
                 e.preventDefault();
-                e.stopPropagation(); // Evita herança de evento
+                e.stopPropagation();
                 if(document.activeElement.id === 'prodGasto') {
                     processarBotaoItem();
                 } else if(inputs[idx+1]) {
@@ -229,10 +229,13 @@
 
     // --- FUNÇÕES DE BUSCA ---
     function buscarFornecedor() {
-        const t = document.getElementById('loteFornBusca').value.toLowerCase().trim();
-        if(!t) { document.getElementById('labelForn').innerText = ""; return; }
-        const f = db_fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
-        document.getElementById('labelForn').innerText = f ? f.nome : "Não cadastrado";
+        const val = document.getElementById('loteForn').value;
+        if(!val) { 
+            document.getElementById('labelForn').innerText = ""; 
+            return; 
+        }
+        // Como agora é uma lista, o valor selecionado já é o próprio nome do fornecedor
+        document.getElementById('labelForn').innerText = val;
     }
 
     function buscarProduto() {
@@ -288,7 +291,6 @@
             carrinho_temp.push(item); 
             renderizarCarrinho(); 
             limparCamposProd(); 
-            // Pequeno delay para garantir que o foco limpo não resgate lixos de memória
             setTimeout(() => document.getElementById('prodBusca').focus(), 50);
         }
     }
@@ -334,6 +336,7 @@
         document.getElementById('btnAddItem').innerText = "Atualizar";
         document.getElementById('loteData').value = it.dataRAW;
         document.getElementById('loteComp').value = it.comprador;
+        document.getElementById('loteForn').value = it.fornecedor; // Atualiza a seleção do select
         document.getElementById('labelForn').innerText = it.fornecedor;
         document.getElementById('prodBusca').value = it.cod;
         document.getElementById('labelProd').innerText = it.nome;
@@ -419,4 +422,30 @@
     function listarCadastro(tipo) { const lista = tipo === 'compradores' ? db_compradores : db_fornecedores; document.getElementById('listaCad').innerHTML = lista.map((i, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>${i.nome}</span><button onclick="removerCad('${tipo}',${idx})" style="color:red; border:none; background:none; cursor:pointer">X</button></div>`).join(''); }
     function removerCad(t, i) { const l = t === 'compradores' ? db_compradores : db_fornecedores; l.splice(i,1); localStorage.setItem(t, JSON.stringify(l)); atualizarSelects(); listarCadastro(t); }
     function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-    function excluirItem(idx) { if(confirm("Excluir?")) { db_
+    function excluirItem(idx) { if(confirm("Excluir?")) { db_lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos)); renderizarTabela(); } }
+    
+    function limparCamposProd() { 
+        document.getElementById('prodBusca').value = ""; 
+        document.getElementById('labelProd').innerText = ""; 
+        document.getElementById('prodQtd').value = ""; 
+        document.getElementById('prodCusto').value = ""; 
+        document.getElementById('prodVenda').value = ""; 
+        document.getElementById('prodGasto').value = "0"; 
+    }
+    
+    function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
+    
+    // ATUALIZADA PARA INJETAR OS FORNECEDORES NO NOVO SELECT DO MODAL
+    function atualizarSelects() {
+        const c = db_compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+        const f = db_fornecedores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+        
+        document.getElementById('loteComp').innerHTML = '<option value="">Selecione</option>' + c;
+        document.getElementById('loteForn').innerHTML = '<option value="">Selecione</option>' + f; // Injeta os fornecedores no modal de lançamento
+        
+        document.getElementById('filtroComp').innerHTML = '<option value="">Comprador: Todos</option>' + c;
+        document.getElementById('filtroForn').innerHTML = '<option value="">Fornecedor: Todos</option>' + f;
+    }
+</script>
+</body>
+</html>
