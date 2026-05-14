@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v5.1 - Correção Edição</title>
+    <title>Sistema Colméia v6.0 - Carrinho Detalhado</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -34,7 +34,7 @@
         th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 10px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto; }
-        .modal-content { background-color: #fff; margin: 2% auto; padding: 25px; width: 95%; max-width: 1100px; border-radius: 12px; position: relative; }
+        .modal-content { background-color: #fff; margin: 1% auto; padding: 25px; width: 95%; max-width: 1200px; border-radius: 12px; position: relative; }
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
         
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
@@ -42,14 +42,14 @@
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #dadce0; border-radius: 4px; font-size: 13px; }
         
         .info-busca { display: block; font-size: 11px; color: #1a73e8; margin-top: 3px; font-weight: bold; min-height: 15px; }
-        .carrinho-container { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+        .carrinho-container { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; max-height: 250px; overflow-y: auto; background: white; }
     </style>
 </head>
 <body>
 
     <header>
         <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-        <h1 style="margin: 0; font-size: 20px;">Sistema Colméia - Correção Ativada</h1>
+        <h1 style="margin: 0; font-size: 20px;">Sistema Colméia - Lançamento Detalhado</h1>
     </header>
 
     <main>
@@ -92,9 +92,7 @@
     <div id="modalLancamento" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
-            <h2 id="tituloModal" style="color: #1a73e8; margin-top:0">Lote de Produtos</h2>
-            
-            <!-- Campo oculto para saber se estamos editando -->
+            <h2 id="tituloModal" style="color: #1a73e8; margin-top:0">Novo Lote</h2>
             <input type="hidden" id="editIndexGlobal" value="">
 
             <div class="form-grid" style="margin-bottom: 15px; background: #fff;">
@@ -140,13 +138,18 @@
                 </div>
             </div>
 
+            <!-- CARRINHO COM INFORMAÇÕES COMPLETAS (Conforme imagem image_a30192.png) -->
             <div class="carrinho-container" id="areaCarrinho">
                 <table style="margin-top:0">
-                    <thead>
-                        <tr style="background:#eee">
+                    <thead style="position: sticky; top: 0; background: #eee; z-index: 10;">
+                        <tr>
                             <th>Produto</th>
                             <th>Qtd</th>
+                            <th>Custo Un</th>
+                            <th>Venda Un</th>
+                            <th>Gasto Ex</th>
                             <th>Lucro Un</th>
+                            <th>Lucro Total</th>
                             <th>Ação</th>
                         </tr>
                     </thead>
@@ -158,12 +161,27 @@
         </div>
     </div>
 
-    <!-- MODAL FORNECEDORES / COMPRADORES (Simplificados para o código não ficar gigante) -->
-    <div id="modalGenerico" class="modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <span class="close" onclick="fecharModal('modalGenerico')">&times;</span>
-            <h2 id="tituloGer">Cadastro</h2>
-            <div id="corpoGer"></div>
+    <!-- MODAIS DE CADASTRO -->
+    <div id="modalCompradores" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <span class="close" onclick="fecharModal('modalCompradores')">&times;</span>
+            <h2>Cadastro de Compradores</h2>
+            <input type="text" id="compNome" placeholder="Nome do Comprador" style="width:100%; margin-bottom:10px">
+            <button class="btn btn-novo" style="width:100%" onclick="cadastrarComprador()">Salvar Comprador</button>
+            <div id="listaCompCadastrados" style="margin-top:15px"></div>
+        </div>
+    </div>
+
+    <div id="modalFornecedores" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
+            <h2>Cadastro de Fornecedores</h2>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input type="text" id="fornCod" placeholder="Cód" style="width:30%">
+                <input type="text" id="fornNome" placeholder="Nome" style="width:70%">
+            </div>
+            <button class="btn btn-novo" style="width:100%" onclick="cadastrarFornecedor()">Salvar Fornecedor</button>
+            <div id="listaFornCadastrados" style="margin-top:15px"></div>
         </div>
     </div>
 
@@ -199,80 +217,12 @@
             } catch (e) { console.error("Erro API:", e); }
         }
 
-        // --- FUNÇÃO DE EDIÇÃO (CORRIGIDA) ---
-        function alterarLancamento(idx) {
-            const it = lancamentos[idx];
-            abrirModalLancamento(); // Isso limpa tudo e prepara o select de compradores
-            
-            document.getElementById('tituloModal').innerText = "Alterar Lançamento";
-            document.getElementById('editIndexGlobal').value = idx;
-            document.getElementById('areaCarrinho').style.display = 'none';
-            document.getElementById('btnFinalizar').style.display = 'none';
-            document.getElementById('btnAcaoInterna').innerText = "Confirmar Alteração";
-
-            // Preenche os campos com os dados do item
-            document.getElementById('dataLote').value = it.dataRAW;
-            document.getElementById('selComprador').value = it.comprador;
-            document.getElementById('codFornecedor').value = it.codFornecedor;
-            document.getElementById('nomeFornecedor').innerText = it.nomeFornecedor;
-            document.getElementById('codProduto').value = it.codProduto;
-            document.getElementById('nomeProduto').innerText = it.nomeProduto;
-            document.getElementById('qtdItem').value = it.qtd;
-            document.getElementById('custoItem').value = it.custoUn;
-            document.getElementById('vendaItem').value = it.vendaUn;
-            document.getElementById('gastoItem').value = it.gastoExUn;
-        }
-
-        // Decida se adiciona ao carrinho ou atualiza o item editado
-        function processarBotaoItem() {
-            const idxEdit = document.getElementById('editIndexGlobal').value;
-            
-            if (idxEdit !== "") {
-                // LÓGICA DE ATUALIZAÇÃO
-                const dt = document.getElementById('dataLote').value;
-                const comp = document.getElementById('selComprador').value;
-                const cf = document.getElementById('codFornecedor').value;
-                const nf = document.getElementById('nomeFornecedor').innerText;
-
-                const qt = parseFloat(document.getElementById('qtdItem').value);
-                const ci = parseFloat(document.getElementById('custoItem').value) || 0;
-                const vi = parseFloat(document.getElementById('vendaItem').value) || 0;
-                const gi = parseFloat(document.getElementById('gastoItem').value) || 0;
-                const lUn = vi - (ci + gi);
-
-                lancamentos[idxEdit] = {
-                    dataRAW: dt,
-                    dataBR: dt.split('-').reverse().join('/'),
-                    comprador: comp,
-                    codFornecedor: cf,
-                    nomeFornecedor: nf,
-                    codProduto: document.getElementById('codProduto').value,
-                    nomeProduto: document.getElementById('nomeProduto').innerText,
-                    qtd: qt,
-                    custoUn: ci,
-                    vendaUn: vi,
-                    gastoExUn: gi,
-                    custoTotalItem: (ci + gi) * qt,
-                    lucroTotalItem: lUn * qt,
-                    lucroUn: lUn,
-                    lucro: lUn * qt
-                };
-
-                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
-                renderizarTabela();
-                fecharModal('modalLancamento');
-                alert("Lançamento atualizado!");
-            } else {
-                adicionarAoCarrinho();
-            }
-        }
-
-        // --- RESTANTE DAS FUNÇÕES ---
+        // --- LÓGICA DE LANÇAMENTO E CARRINHO DETALHADO ---
         function adicionarAoCarrinho() {
             const cp = document.getElementById('codProduto').value;
             const np = document.getElementById('nomeProduto').innerText;
             const qt = parseFloat(document.getElementById('qtdItem').value);
-            if(!cp || !qt) return alert("Produto e Qtd são obrigatórios!");
+            if(!cp || !qt) return alert("Produto e Qtd obrigatórios!");
 
             const ci = parseFloat(document.getElementById('custoItem').value) || 0;
             const vi = parseFloat(document.getElementById('vendaItem').value) || 0;
@@ -291,15 +241,52 @@
 
         function atualizarCarrinhoUI() {
             document.getElementById('corpoCarrinho').innerHTML = carrinhoTemporario.map((it, idx) => `
-                <tr><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.lucroUn.toFixed(2)}</td>
-                <td><button onclick="carrinhoTemporario.splice(${idx},1); atualizarCarrinhoUI()">✕</button></td></tr>`).join('');
+                <tr>
+                    <td>${it.nomeProduto}</td>
+                    <td>${it.qtd}</td>
+                    <td>R$ ${it.custoUn.toFixed(2)}</td>
+                    <td>R$ ${it.vendaUn.toFixed(2)}</td>
+                    <td>R$ ${it.gastoExUn.toFixed(2)}</td>
+                    <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
+                    <td style="font-weight:bold">R$ ${it.lucroTotalItem.toFixed(2)}</td>
+                    <td><button class="btn-excluir" onclick="carrinhoTemporario.splice(${idx},1); atualizarCarrinhoUI()">✕</button></td>
+                </tr>`).join('');
+        }
+
+        function processarBotaoItem() {
+            const idxEdit = document.getElementById('editIndexGlobal').value;
+            if (idxEdit !== "") {
+                const dt = document.getElementById('dataLote').value;
+                const comp = document.getElementById('selComprador').value;
+                const cf = document.getElementById('codFornecedor').value;
+                const nf = document.getElementById('nomeFornecedor').innerText;
+
+                const qt = parseFloat(document.getElementById('qtdItem').value);
+                const ci = parseFloat(document.getElementById('custoItem').value) || 0;
+                const vi = parseFloat(document.getElementById('vendaItem').value) || 0;
+                const gi = parseFloat(document.getElementById('gastoItem').value) || 0;
+                const lUn = vi - (ci + gi);
+
+                lancamentos[idxEdit] = {
+                    dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, codFornecedor: cf, nomeFornecedor: nf,
+                    codProduto: document.getElementById('codProduto').value, nomeProduto: document.getElementById('nomeProduto').innerText,
+                    qtd: qt, custoUn: ci, vendaUn: vi, gastoExUn: gi, custoTotalItem: (ci + gi) * qt, lucroTotalItem: lUn * qt, lucroUn: lUn, lucro: lUn * qt
+                };
+
+                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+                renderizarTabela();
+                fecharModal('modalLancamento');
+                alert("Alterado com sucesso!");
+            } else {
+                adicionarAoCarrinho();
+            }
         }
 
         function salvarLoteCompleto() {
             const dt = document.getElementById('dataLote').value;
             const comp = document.getElementById('selComprador').value;
             const nf = document.getElementById('nomeFornecedor').innerText;
-            if(!dt || !comp || carrinhoTemporario.length === 0) return alert("Preencha Data, Comprador e Itens!");
+            if(!dt || !comp || carrinhoTemporario.length === 0) return alert("Dados incompletos!");
 
             carrinhoTemporario.forEach(it => {
                 lancamentos.unshift({ dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, nomeFornecedor: nf, ...it, lucro: it.lucroTotalItem });
@@ -309,6 +296,32 @@
             fecharModal('modalLancamento');
         }
 
+        // --- NAVEGAÇÃO E BUSCA ---
+        function buscarFornecedor() {
+            const t = document.getElementById('codFornecedor').value.toLowerCase().trim();
+            const f = fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
+            if(f) { document.getElementById('codFornecedor').value = f.id; document.getElementById('nomeFornecedor').innerText = f.nome; }
+        }
+
+        function buscarProduto() {
+            const t = document.getElementById('codProduto').value.toLowerCase().trim();
+            const p = listaProdutosAPI.find(i => i.codigo.toLowerCase() === t || i.nome.toLowerCase().includes(t));
+            if(p) { document.getElementById('codProduto').value = p.codigo; document.getElementById('nomeProduto').innerText = p.nome; document.getElementById('vendaItem').value = p.preco; }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const nav = Array.from(document.querySelectorAll('.input-nav'));
+                const idx = nav.indexOf(document.activeElement);
+                if (idx > -1) {
+                    e.preventDefault();
+                    if (document.activeElement.id === 'gastoItem') processarBotaoItem();
+                    else nav[idx + 1].focus();
+                }
+            }
+        });
+
+        // --- RENDERIZAÇÃO E FILTROS ---
         function renderizarTabela() {
             const tbody = document.getElementById('listaGeral');
             tbody.innerHTML = "";
@@ -334,18 +347,47 @@
             });
         }
 
+        function alterarLancamento(idx) {
+            const it = lancamentos[idx];
+            abrirModalLancamento();
+            document.getElementById('tituloModal').innerText = "Alterar Lançamento";
+            document.getElementById('editIndexGlobal').value = idx;
+            document.getElementById('areaCarrinho').style.display = 'none';
+            document.getElementById('btnFinalizar').style.display = 'none';
+            document.getElementById('btnAcaoInterna').innerText = "Atualizar Item";
+
+            document.getElementById('dataLote').value = it.dataRAW;
+            document.getElementById('selComprador').value = it.comprador;
+            document.getElementById('codFornecedor').value = it.codFornecedor;
+            document.getElementById('nomeFornecedor').innerText = it.nomeFornecedor;
+            document.getElementById('codProduto').value = it.codProduto;
+            document.getElementById('nomeProduto').innerText = it.nomeProduto;
+            document.getElementById('qtdItem').value = it.qtd;
+            document.getElementById('custoItem').value = it.custoUn;
+            document.getElementById('vendaItem').value = it.vendaUn;
+            document.getElementById('gastoItem').value = it.gastoExUn;
+        }
+
+        // --- GESTÃO DE CADASTROS ---
         function abrirModalLancamento() {
             document.getElementById('modalLancamento').style.display = 'block';
-            document.getElementById('tituloModal').innerText = "Novo Lote";
             document.getElementById('editIndexGlobal').value = "";
             document.getElementById('areaCarrinho').style.display = 'block';
             document.getElementById('btnFinalizar').style.display = 'block';
             document.getElementById('btnAcaoInterna').innerText = "+ Adicionar";
-            
-            const sel = document.getElementById('selComprador');
-            sel.innerHTML = '<option value="">Selecione...</option>' + compradores.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
-            
+            document.getElementById('selComprador').innerHTML = '<option value="">Selecione...</option>' + compradores.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
             carrinhoTemporario = []; atualizarCarrinhoUI();
+        }
+
+        function cadastrarComprador() {
+            const nm = document.getElementById('compNome').value;
+            if(nm) { compradores.push({nome: nm}); localStorage.setItem('compradores', JSON.stringify(compradores)); document.getElementById('compNome').value = ""; listarCompradores(); atualizarSelectsFiltro(); }
+        }
+
+        function cadastrarFornecedor() {
+            const id = document.getElementById('fornCod').value;
+            const nm = document.getElementById('fornNome').value;
+            if(id && nm) { fornecedores.push({id, nome: nm}); localStorage.setItem('fornecedores', JSON.stringify(fornecedores)); document.getElementById('fornCod').value = ""; document.getElementById('fornNome').value = ""; listarFornecedores(); atualizarSelectsFiltro(); }
         }
 
         function atualizarSelectsFiltro() {
@@ -353,24 +395,14 @@
             document.getElementById('filtroFornecedor').innerHTML = '<option value="">Todos Fornecedores</option>' + fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
         }
 
-        function buscarFornecedor() {
-            const t = document.getElementById('codFornecedor').value.toLowerCase().trim();
-            const f = fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
-            if(f) { document.getElementById('codFornecedor').value = f.id; document.getElementById('nomeFornecedor').innerText = f.nome; }
-        }
-
-        function buscarProduto() {
-            const t = document.getElementById('codProduto').value.toLowerCase().trim();
-            const p = listaProdutosAPI.find(i => i.codigo.toLowerCase() === t || i.nome.toLowerCase().includes(t));
-            if(p) { document.getElementById('codProduto').value = p.codigo; document.getElementById('nomeProduto').innerText = p.nome; document.getElementById('vendaItem').value = p.preco; }
-        }
-
+        function listarCompradores() { document.getElementById('listaCompCadastrados').innerHTML = compradores.map((c, i) => `<div style="display:flex; justify-content:space-between; margin-top:5px"><span>${c.nome}</span><button onclick="compradores.splice(${i},1); localStorage.setItem('compradores',JSON.stringify(compradores)); listarCompradores(); atualizarSelectsFiltro();">X</button></div>`).join(''); }
+        function listarFornecedores() { document.getElementById('listaFornCadastrados').innerHTML = fornecedores.map((f, i) => `<div style="display:flex; justify-content:space-between; margin-top:5px"><span>${f.nome}</span><button onclick="fornecedores.splice(${i},1); localStorage.setItem('fornecedores',JSON.stringify(fornecedores)); listarFornecedores(); atualizarSelectsFiltro();">X</button></div>`).join(''); }
+        function abrirModalComprador() { document.getElementById('modalCompradores').style.display='block'; listarCompradores(); }
+        function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display='block'; listarFornecedores(); }
         function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
         function limparCamposProduto() { document.getElementById('codProduto').value = ""; document.getElementById('nomeProduto').innerText = ""; document.getElementById('qtdItem').value = ""; document.getElementById('custoItem').value = ""; document.getElementById('vendaItem').value = ""; document.getElementById('gastoItem').value = "0"; }
-        
-        // Funções simples de cadastro para os outros modais
-        function abrirModalComprador() { alert("Use o código anterior para cadastrar compradores. Esta versão foca na correção do botão EDITAR."); }
-        function abrirModalFornecedor() { alert("Use o código anterior para cadastrar fornecedores."); }
+        function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
+        function imprimirSelecionados() { const marcados = document.querySelectorAll('.chk-item:checked'); let h = `Relatório Colméia\n\n`; marcados.forEach(c => { const it = lancamentos[c.value]; h += `${it.dataBR} | ${it.comprador} | ${it.nomeProduto}\n`; }); alert(h); }
     </script>
 </body>
 </html>
