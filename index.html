@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v8.8 - Fornecedores em Lista</title>
+    <title>Sistema Colméia v9.0 - Banco de Dados em Nuvem</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background-color: #f4f7f6; margin: 0; padding: 0; }
@@ -54,12 +54,15 @@
         .carrinho-container table { margin-top: 0; }
         .carrinho-container thead { background: #f8f9fa; border-bottom: 2px solid #ddd; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
 
 <header>
     <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.8</h1>
+    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v9.0 Cloud</h1>
 </header>
 
 <main>
@@ -181,14 +184,29 @@
 </div>
 
 <script>
-    // Configurações
+    // Suas credenciais vinculadas e prontas
+    const firebaseConfig = {
+        apiKey: "AIzaSyCA9UxwD5s3ftd8pgIIc5sMnNFdnJf7OrY",
+        authDomain: "sistema-colmeia-39499.firebaseapp.com",
+        databaseURL: "https://sistema-colmeia-39499-default-rtdb.firebaseio.com",
+        projectId: "sistema-colmeia-39499",
+        storageBucket: "sistema-colmeia-39499.firebasestorage.app",
+        messagingSenderId: "686485031779",
+        appId: "1:686485031779:web:f9907de1466759cdb2e156"
+    };
+
+    // Inicializando a conexão com a nuvem
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     const PLANILHA_ID = '1cl89xjWPjxyULh4Jw5XZc89uO057pDPaivUKSCiy-xM';
     const URL_DADOS = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, E`;
     
     let db_produtos = [];
-    let db_fornecedores = JSON.parse(localStorage.getItem('fornecedores')) || [];
-    let db_compradores = JSON.parse(localStorage.getItem('compradores')) || [];
-    let db_lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
+    let db_fornecedores = [];
+    let db_compradores = [];
+    let db_lancamentos = [];
+    let db_chaves_firebase = []; 
     let carrinho_temp = [];
 
     window.onload = async () => {
@@ -206,9 +224,36 @@
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('filtroDataIn').value = hoje;
         document.getElementById('filtroDataFim').value = hoje;
-        atualizarSelects();
-        renderizarTabela();
+        
+        ouvirNuvem();
     };
+
+    function ouvirNuvem() {
+        // Sincroniza compradores da Nuvem
+        database.ref('compradores').on('value', snapshot => {
+            db_compradores = [];
+            snapshot.forEach(child => { db_compradores.push(child.val()); });
+            atualizarSelects();
+        });
+
+        // Sincroniza fornecedores da Nuvem
+        database.ref('fornecedores').on('value', snapshot => {
+            db_fornecedores = [];
+            snapshot.forEach(child => { db_fornecedores.push(child.val()); });
+            atualizarSelects();
+        });
+
+        // Sincroniza lançamentos gerais da Nuvem
+        database.ref('lancamentos').on('value', snapshot => {
+            db_lancamentos = [];
+            db_chaves_firebase = [];
+            snapshot.forEach(child => {
+                db_lancamentos.unshift(child.val()); 
+                db_chaves_firebase.unshift(child.key); 
+            });
+            renderizarTabela();
+        });
+    }
 
     // Navegação Enter
     document.addEventListener('keydown', (e) => {
@@ -227,15 +272,9 @@
         }
     });
 
-    // --- FUNÇÕES DE BUSCA ---
     function buscarFornecedor() {
         const val = document.getElementById('loteForn').value;
-        if(!val) { 
-            document.getElementById('labelForn').innerText = ""; 
-            return; 
-        }
-        // Como agora é uma lista, o valor selecionado já é o próprio nome do fornecedor
-        document.getElementById('labelForn').innerText = val;
+        document.getElementById('labelForn').innerText = val ? val : "";
     }
 
     function buscarProduto() {
@@ -251,7 +290,6 @@
         }
     }
 
-    // --- LÓGICA DO MODAL ---
     function abrirModalLote() {
         document.getElementById('modalLote').style.display = 'block';
         document.getElementById('modalTitulo').innerText = "Novo Lote";
@@ -284,13 +322,18 @@
 
         if(idxEdit !== "") {
             const dt = document.getElementById('loteData').value;
-            db_lancamentos[idxEdit] = { ...item, dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: document.getElementById('loteComp').value, fornecedor: document.getElementById('labelForn').innerText };
-            localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos));
-            renderizarTabela(); fecharModal('modalLote');
+            const chaveFirebase = db_chaves_firebase[idxEdit];
+            
+            database.ref('lancamentos/' + chaveFirebase).set({
+                ...item,
+                dataRAW: dt,
+                dataBR: dt.split('-').reverse().join('/'),
+                comprador: document.getElementById('loteComp').value,
+                fornecedor: document.getElementById('labelForn').innerText
+            });
+            fecharModal('modalLote');
         } else {
-            carrinho_temp.push(item); 
-            renderizarCarrinho(); 
-            limparCamposProd(); 
+            carrinho_temp.push(item); renderizarCarrinho(); limparCamposProd(); 
             setTimeout(() => document.getElementById('prodBusca').focus(), 50);
         }
     }
@@ -305,12 +348,13 @@
         const comp = document.getElementById('loteComp').value;
         const forn = document.getElementById('labelForn').innerText;
         if(!dt || !comp || carrinho_temp.length === 0) return alert("Erro no cabeçalho ou itens vazios!");
-        carrinho_temp.forEach(it => db_lancamentos.unshift({ ...it, dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, fornecedor: forn }));
-        localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos));
-        renderizarTabela(); fecharModal('modalLote');
+        
+        carrinho_temp.forEach(it => {
+            database.ref('lancamentos').push({ ...it, dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, fornecedor: forn });
+        });
+        fecharModal('modalLote');
     }
 
-    // Tabela Principal
     function renderizarTabela() {
         const tbody = document.getElementById('corpoTabela');
         tbody.innerHTML = "";
@@ -336,7 +380,7 @@
         document.getElementById('btnAddItem').innerText = "Atualizar";
         document.getElementById('loteData').value = it.dataRAW;
         document.getElementById('loteComp').value = it.comprador;
-        document.getElementById('loteForn').value = it.fornecedor; // Atualiza a seleção do select
+        document.getElementById('loteForn').value = it.fornecedor; 
         document.getElementById('labelForn').innerText = it.fornecedor;
         document.getElementById('prodBusca').value = it.cod;
         document.getElementById('labelProd').innerText = it.nome;
@@ -346,57 +390,11 @@
         document.getElementById('prodGasto').value = it.gasto;
     }
 
-    // Relatórios
+    // Imprimir Relatórios
     function imprimirCupom(idx) {
         const it = db_lancamentos[idx];
         const win = window.open('', '', 'width=350,height=600');
-        
-        win.document.write(`
-            <html>
-            <head>
-                <style>
-                    @page { margin: 0; }
-                    body { 
-                        width: 75mm; font-family: 'Arial', sans-serif; 
-                        padding: 5mm; margin: 0; font-size: 14px; color: #000; font-weight: 700;
-                    }
-                    .centro { text-align: center; }
-                    .negrito { font-weight: 900; }
-                    .separador { border-top: 2px solid #000; margin: 8px 0; }
-                    .linha { display: flex; justify-content: space-between; margin: 3px 0; }
-                    .titulo { font-size: 18px; margin-bottom: 5px; text-transform: uppercase; }
-                </style>
-            </head>
-            <body onload="window.print(); window.close();">
-                <div class="centro negrito titulo">SISTEMA COLMÉIA</div>
-                <div class="centro negrito">*** LANÇAMENTO ***</div>
-                <div class="separador"></div>
-                
-                <div class="linha"><span>DATA:</span> <span>${it.dataBR}</span></div>
-                <div class="linha"><span>COMPRADOR:</span> <span>${it.comprador}</span></div>
-                <div class="linha"><span>FORN:</span> <span>${it.fornecedor || '---'}</span></div>
-                
-                <div class="separador"></div>
-                <div class="negrito centro">${it.nome}</div>
-                <div class="linha"><span>QUANTIDADE:</span> <span>${it.qtd}</span></div>
-                <div class="linha"><span>CUSTO UN:</span> <span>R$ ${it.custo.toFixed(2)}</span></div>
-                <div class="linha"><span>VENDA UN:</span> <span>R$ ${it.venda.toFixed(2)}</span></div>
-                
-                <div class="separador"></div>
-                <div class="linha negrito"><span>LUCRO UN:</span> <span>R$ ${it.lucroUn.toFixed(2)}</span></div>
-                <div class="linha negrito"><span>LUCRO TOTAL:</span> <span>R$ ${it.lucroTot.toFixed(2)}</span></div>
-                <div class="linha negrito" style="font-size: 16px; margin-top: 5px; border: 1px solid #000; padding: 2px;">
-                    <span>VALOR TOTAL:</span> <span>R$ ${(it.venda * it.qtd).toFixed(2)}</span>
-                </div>
-                
-                <div class="separador"></div>
-                <div class="centro" style="margin-top: 15px;">
-                    ${new Date().toLocaleString('pt-BR')}<br>
-                    *** FIM DO CUPOM ***
-                </div>
-            </body>
-            </html>
-        `);
+        win.document.write(`<html><head><style>@page { margin: 0; } body { width: 75mm; font-family: 'Arial', sans-serif; padding: 5mm; margin: 0; font-size: 14px; color: #000; font-weight: 700; } .centro { text-align: center; } .negrito { font-weight: 900; } .separador { border-top: 2px solid #000; margin: 8px 0; } .linha { display: flex; justify-content: space-between; margin: 3px 0; } .titulo { font-size: 18px; margin-bottom: 5px; text-transform: uppercase; }</style></head><body onload="window.print(); window.close();"><div class="centro negrito titulo">SISTEMA COLMÉIA</div><div class="centro negrito">*** LANÇAMENTO ***</div><div class="separador"></div><div class="linha"><span>DATA:</span> <span>${it.dataBR}</span></div><div class="linha"><span>COMPRADOR:</span> <span>${it.comprador}</span></div><div class="linha"><span>FORN:</span> <span>${it.fornecedor || '---'}</span></div><div class="separador"></div><div class="negrito centro">${it.nome}</div><div class="linha"><span>QUANTIDADE:</span> <span>${it.qtd}</span></div><div class="linha"><span>CUSTO UN:</span> <span>R$ ${it.custo.toFixed(2)}</span></div><div class="linha"><span>VENDA UN:</span> <span>R$ ${it.venda.toFixed(2)}</span></div><div class="separador"></div><div class="linha negrito"><span>LUCRO UN:</span> <span>R$ ${it.lucroUn.toFixed(2)}</span></div><div class="linha negrito"><span>LUCRO TOTAL:</span> <span>R$ ${it.lucroTot.toFixed(2)}</span></div><div class="linha negrito" style="font-size: 16px; margin-top: 5px; border: 1px solid #000; padding: 2px;"><span>VALOR TOTAL:</span> <span>R$ ${(it.venda * it.qtd).toFixed(2)}</span></div><div class="separador"></div><div class="centro" style="margin-top: 15px;">${new Date().toLocaleString('pt-BR')}<br>*** FIM DO CUPOM ***</div></body></html>`);
         win.document.close();
     }
 
@@ -410,39 +408,53 @@
             totalC += (it.custo + it.gasto) * it.qtd;
             linhas += `<tr><td>${it.dataBR}</td><td>${it.comprador}</td><td>${it.fornecedor}</td><td>${it.nome}</td><td align="center">${it.qtd}</td><td>R$ ${it.custo.toFixed(2)}</td><td>R$ ${it.venda.toFixed(2)}</td><td>R$ ${it.gasto.toFixed(2)}</td><td><b>R$ ${it.lucroUn.toFixed(2)}</b></td><td><b>R$ ${it.lucroTot.toFixed(2)}</b></td></tr>`;
         });
-
         const win = window.open('', '', 'width=1100');
         win.document.write(`<html><head><style>@page { size: landscape; } body { font-family: sans-serif; font-size: 12px; } table { width:100%; border-collapse:collapse; } th, td { border:1px solid #ccc; padding:8px; } th { background:#eee; }</style></head><body><h2>Relatório Colméia</h2><table><thead><tr><th>Data</th><th>Comprador</th><th>Fornecedor</th><th>Produto</th><th>Qtd</th><th>Custo Un</th><th>Venda Un</th><th>Gasto Ex</th><th>Lucro Un</th><th>Lucro Total</th></tr></thead><tbody>${linhas}</tbody></table><div style="margin-top:20px; text-align:right">CUSTO TOTAL: <b>R$ ${totalC.toFixed(2)}</b> | LUCRO TOTAL: <b style="font-size:18px; color:#1a73e8">R$ ${totalL.toFixed(2)}</b></div></body></html>`);
         win.document.close(); win.print();
     }
 
-    // Cadastro e Gerais
-    function abrirCadastro(tipo) { document.getElementById('modalCad').style.display = 'block'; document.getElementById('tituloCad').innerText = "Gestão de " + tipo; const extra = tipo === 'fornecedores' ? `<input type="text" id="cadID" placeholder="Código" style="width:100%; margin-bottom:10px">` : ""; document.getElementById('formCad').innerHTML = `${extra}<input type="text" id="cadNome" placeholder="Nome" style="width:100%"><button class="btn btn-novo" style="width:100%; margin-top:10px" onclick="salvarCadastro('${tipo}')">Gravar</button>`; listarCadastro(tipo); }
-    function salvarCadastro(tipo) { const nome = document.getElementById('cadNome').value; if(!nome) return; const id = document.getElementById('cadID') ? document.getElementById('cadID').value : Date.now().toString(); const lista = tipo === 'compradores' ? db_compradores : db_fornecedores; lista.push({id, nome}); localStorage.setItem(tipo, JSON.stringify(lista)); atualizarSelects(); listarCadastro(tipo); }
-    function listarCadastro(tipo) { const lista = tipo === 'compradores' ? db_compradores : db_fornecedores; document.getElementById('listaCad').innerHTML = lista.map((i, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>${i.nome}</span><button onclick="removerCad('${tipo}',${idx})" style="color:red; border:none; background:none; cursor:pointer">X</button></div>`).join(''); }
-    function removerCad(t, i) { const l = t === 'compradores' ? db_compradores : db_fornecedores; l.splice(i,1); localStorage.setItem(t, JSON.stringify(l)); atualizarSelects(); listarCadastro(t); }
+    // Cadastros na nuvem
+    function abrirCadastro(tipo) { 
+        document.getElementById('modalCad').style.display = 'block'; 
+        document.getElementById('tituloCad').innerText = "Gestão de " + tipo; 
+        document.getElementById('formCad').innerHTML = `<input type="text" id="cadNome" placeholder="Nome" style="width:100%"><button class="btn btn-novo" style="width:100%; margin-top:10px" onclick="salvarCadastro('${tipo}')">Gravar</button>`; 
+        listarCadastro(tipo); 
+    }
+
+    function salvarCadastro(tipo) { 
+        const nome = document.getElementById('cadNome').value.trim(); 
+        if(!nome) return; 
+        database.ref(tipo).push({ nome: nome });
+        document.getElementById('cadNome').value = "";
+    }
+
+    function listarCadastro(tipo) {
+        database.ref(tipo).on('value', snapshot => {
+            let html = "";
+            snapshot.forEach(child => {
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>${child.val().nome}</span><button onclick="database.ref('${tipo}/${child.key}').remove()" style="color:red; border:none; background:none; cursor:pointer">X</button></div>`;
+            });
+            document.getElementById('listaCad').innerHTML = html;
+        });
+    }
+
     function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-    function excluirItem(idx) { if(confirm("Excluir?")) { db_lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos)); renderizarTabela(); } }
     
-    function limparCamposProd() { 
-        document.getElementById('prodBusca').value = ""; 
-        document.getElementById('labelProd').innerText = ""; 
-        document.getElementById('prodQtd').value = ""; 
-        document.getElementById('prodCusto').value = ""; 
-        document.getElementById('prodVenda').value = ""; 
-        document.getElementById('prodGasto').value = "0"; 
+    function excluirItem(idx) { 
+        if(confirm("Excluir do banco de dados na nuvem?")) { 
+            const chaveFirebase = db_chaves_firebase[idx];
+            database.ref('lancamentos/' + chaveFirebase).remove();
+        } 
     }
     
+    function limparCamposProd() { document.getElementById('prodBusca').value = ""; document.getElementById('labelProd').innerText = ""; document.getElementById('prodQtd').value = ""; document.getElementById('prodCusto').value = ""; document.getElementById('prodVenda').value = ""; document.getElementById('prodGasto').value = "0"; }
     function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
     
-    // ATUALIZADA PARA INJETAR OS FORNECEDORES NO NOVO SELECT DO MODAL
     function atualizarSelects() {
         const c = db_compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
         const f = db_fornecedores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-        
         document.getElementById('loteComp').innerHTML = '<option value="">Selecione</option>' + c;
-        document.getElementById('loteForn').innerHTML = '<option value="">Selecione</option>' + f; // Injeta os fornecedores no modal de lançamento
-        
+        document.getElementById('loteForn').innerHTML = '<option value="">Selecione</option>' + f;
         document.getElementById('filtroComp').innerHTML = '<option value="">Comprador: Todos</option>' + c;
         document.getElementById('filtroForn').innerHTML = '<option value="">Fornecedor: Todos</option>' + f;
     }
