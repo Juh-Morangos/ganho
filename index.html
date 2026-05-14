@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v8.0 - Versão Final Estabilizada</title>
+    <title>Sistema Colméia v8.5 - Versão Completa e Estabilizada</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background-color: #f4f7f6; margin: 0; padding: 0; }
@@ -34,7 +34,7 @@
         .btn-cupom { background-color: #17a2b8; }
 
         /* Tabela Principal */
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f1f3f4; color: #5f6368; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -48,7 +48,7 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px; color: #666; }
         .form-group input, .form-group select { width: 100%; }
 
-        /* Carrinho Modal (Fiel à imagem image_a30192.png) */
+        /* Carrinho Modal */
         .carrinho-container { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
         .carrinho-container table { margin-top: 0; }
         .carrinho-container thead { background: #f8f9fa; border-bottom: 2px solid #ddd; }
@@ -58,7 +58,7 @@
 
 <header>
     <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.0</h1>
+    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.5</h1>
 </header>
 
 <main>
@@ -98,14 +98,12 @@
     </table>
 </main>
 
-<!-- MODAL LANÇAMENTO -->
 <div id="modalLote" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalLote')">&times;</span>
         <h2 id="modalTitulo" style="color: #1a73e8; margin-top:0;">Novo Lote</h2>
         <input type="hidden" id="editIndex" value="">
 
-        <!-- Seção Lote -->
         <div class="form-grid">
             <div class="form-group">
                 <label>Data:</label>
@@ -122,7 +120,6 @@
             </div>
         </div>
 
-        <!-- Seção Produto -->
         <div class="form-grid" style="background:#fff; border: 1px solid #ddd;">
             <div class="form-group" style="grid-column: span 2;">
                 <label>Produto:</label>
@@ -150,7 +147,6 @@
             </div>
         </div>
 
-        <!-- Carrinho Detalhado (Como na imagem image_a30192.png) -->
         <div class="carrinho-container" id="areaCarrinho">
             <table>
                 <thead>
@@ -160,7 +156,7 @@
                         <th>Custo Un</th>
                         <th>Venda Un</th>
                         <th>Gasto Ex</th>
-                        <th>Lucro Un</th>
+                        <th style="color:#1a73e8">Lucro Un</th>
                         <th>Lucro Total</th>
                         <th width="50">Ação</th>
                     </tr>
@@ -173,7 +169,6 @@
     </div>
 </div>
 
-<!-- MODAL CADASTROS -->
 <div id="modalCad" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <span class="close" onclick="fecharModal('modalCad')">&times;</span>
@@ -195,14 +190,18 @@
     let carrinho_temp = [];
 
     window.onload = async () => {
-        const res = await fetch(URL_DADOS);
-        const text = await res.text();
-        const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
-        db_produtos = json.table.rows.map(r => ({
-            cod: r.c[0] ? r.c[0].v.toString() : '',
-            nome: r.c[1] ? r.c[1].v : '',
-            preco: r.c[2] ? parseFloat(r.c[2].v) : 0
-        }));
+        try {
+            const res = await fetch(URL_DADOS);
+            const text = await res.text();
+            const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
+            db_produtos = json.table.rows.map(r => ({
+                cod: r.c[0] ? r.c[0].v.toString() : '',
+                nome: r.c[1] ? r.c[1].v : '',
+                preco: r.c[2] ? parseFloat(r.c[2].v) : 0
+            }));
+        } catch(e) {
+            console.error("Erro ao carregar dados da planilha do Google:", e);
+        }
         
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('filtroDataIn').value = hoje;
@@ -227,17 +226,21 @@
     // --- FUNÇÕES DE BUSCA ---
     function buscarFornecedor() {
         const t = document.getElementById('loteFornBusca').value.toLowerCase().trim();
+        if(!t) { document.getElementById('labelForn').innerText = ""; return; }
         const f = db_fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
         document.getElementById('labelForn').innerText = f ? f.nome : "Não cadastrado";
     }
 
     function buscarProduto() {
         const t = document.getElementById('prodBusca').value.toLowerCase().trim();
+        if(!t) { document.getElementById('labelProd').innerText = ""; return; }
         const p = db_produtos.find(i => i.cod.toLowerCase() === t || i.nome.toLowerCase().includes(t));
         if(p) {
             document.getElementById('prodBusca').value = p.cod;
             document.getElementById('labelProd').innerText = p.nome;
             document.getElementById('prodVenda').value = p.preco;
+        } else {
+            document.getElementById('labelProd').innerText = "Não encontrado";
         }
     }
 
@@ -265,14 +268,17 @@
         const venda = parseFloat(document.getElementById('prodVenda').value) || 0;
         const gasto = parseFloat(document.getElementById('prodGasto').value) || 0;
 
-        if(!cod || !qtd) return alert("Erro: Produto e Qtd obrigatórios.");
+        if(!cod || !qtd || nome === "Não encontrado" || nome === "") {
+            alert("Erro: Certifique-se de preencher um Produto válido e uma Quantidade.");
+            return;
+        }
 
         const lUn = venda - (custo + gasto);
         const lTot = lUn * qtd;
         const item = { cod, nome, qtd, custo, venda, gasto, lucroUn: lUn, lucroTot: lTot };
 
         if(idxEdit !== "") {
-            // EDITAR LANÇAMENTO EXISTENTE
+            // EDITAR LANÇAMENTO EXISTENTE DIRECTAMENTE
             const dt = document.getElementById('loteData').value;
             db_lancamentos[idxEdit] = {
                 ...item,
@@ -296,11 +302,14 @@
     function renderizarCarrinho() {
         document.getElementById('corpoCarrinho').innerHTML = carrinho_temp.map((it, idx) => `
             <tr>
-                <td>${it.nome}</td><td>${it.qtd}</td><td>R$ ${it.custo.toFixed(2)}</td>
-                <td>R$ ${it.venda.toFixed(2)}</td><td>R$ ${it.gasto.toFixed(2)}</td>
+                <td>${it.nome}</td>
+                <td>${it.qtd}</td>
+                <td>R$ ${it.custo.toFixed(2)}</td>
+                <td>R$ ${it.venda.toFixed(2)}</td>
+                <td>R$ ${it.gasto.toFixed(2)}</td>
                 <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
                 <td style="font-weight:bold">R$ ${it.lucroTot.toFixed(2)}</td>
-                <td><button class="btn-excluir" onclick="carrinho_temp.splice(${idx},1); renderizarCarrinho()">✕</button></td>
+                <td><button type="button" class="btn-excluir" style="border:none; border-radius:4px; padding:3px 7px; color:white; cursor:pointer" onclick="carrinho_temp.splice(${idx},1); renderizarCarrinho()">✕</button></td>
             </tr>`).join('');
     }
 
@@ -308,7 +317,7 @@
         const dt = document.getElementById('loteData').value;
         const comp = document.getElementById('loteComp').value;
         const forn = document.getElementById('labelForn').innerText;
-        if(!dt || !comp || carrinho_temp.length === 0) return alert("Erro: Preencha cabeçalho e adicione produtos.");
+        if(!dt || !comp || carrinho_temp.length === 0) return alert("Erro: Selecione a data, o comprador e adicione pelo menos 1 produto no lote.");
 
         carrinho_temp.forEach(it => {
             db_lancamentos.unshift({ ...it, dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, fornecedor: forn });
@@ -334,8 +343,11 @@
                         <td><input type="checkbox" class="chk-item" value="${idx}"></td>
                         <td>${it.dataBR}</td>
                         <td style="color:#ff6b6b; font-weight:bold">${it.comprador}</td>
-                        <td>${it.fornecedor}</td><td>${it.nome}</td><td>${it.qtd}</td>
-                        <td>R$ ${it.custo.toFixed(2)}</td><td>R$ ${it.venda.toFixed(2)}</td>
+                        <td>${it.fornecedor || '---'}</td>
+                        <td>${it.nome}</td>
+                        <td>${it.qtd}</td>
+                        <td>R$ ${it.custo.toFixed(2)}</td>
+                        <td>R$ ${it.venda.toFixed(2)}</td>
                         <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
                         <td style="color:${it.lucroTot>=0?'green':'red'}; font-weight:bold">R$ ${it.lucroTot.toFixed(2)}</td>
                         <td>
@@ -359,8 +371,8 @@
 
         document.getElementById('loteData').value = it.dataRAW;
         document.getElementById('loteComp').value = it.comprador;
-        document.getElementById('loteFornBusca').value = ""; // ID opcional
-        document.getElementById('labelForn').innerText = it.fornecedor;
+        document.getElementById('loteFornBusca').value = ""; 
+        document.getElementById('labelForn').innerText = it.fornecedor || "";
         document.getElementById('prodBusca').value = it.cod;
         document.getElementById('labelProd').innerText = it.nome;
         document.getElementById('prodQtd').value = it.qtd;
@@ -380,51 +392,190 @@
     }
 
     function salvarCadastro(tipo) {
-        const nome = document.getElementById('cadNome').value;
-        const id = document.getElementById('cadID') ? document.getElementById('cadID').value : Date.now().toString();
+        const nome = document.getElementById('cadNome').value.trim();
+        const id = document.getElementById('cadID') ? document.getElementById('cadID').value.trim() : Date.now().toString();
         if(!nome) return;
         const lista = tipo === 'compradores' ? db_compradores : db_fornecedores;
         lista.push({id, nome});
         localStorage.setItem(tipo, JSON.stringify(lista));
-        atualizarSelects(); listarCadastro(tipo);
+        atualizarSelects(); 
+        listarCadastro(tipo);
     }
 
     function listarCadastro(tipo) {
         const lista = tipo === 'compradores' ? db_compradores : db_fornecedores;
-        document.getElementById('listaCad').innerHTML = lista.map((i, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>${i.nome}</span><button onclick="removerCad('${tipo}',${idx})" style="color:red; border:none; background:none; cursor:pointer">X</button></div>`).join('');
+        document.getElementById('listaCad').innerHTML = lista.map((i, idx) => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center; padding: 4px 0; border-bottom: 1px solid #f5f5f5;">
+                <span>${i.nome}</span>
+                <button onclick="removerCad('${tipo}',${idx})" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold;">X</button>
+            </div>`).join('');
     }
 
     function removerCad(tipo, idx) {
         const lista = tipo === 'compradores' ? db_compradores : db_fornecedores;
         lista.splice(idx,1);
         localStorage.setItem(tipo, JSON.stringify(lista));
-        atualizarSelects(); listarCadastro(tipo);
+        atualizarSelects(); 
+        listarCadastro(tipo);
     }
 
-    // --- UTILITÁRIOS ---
+    // --- RELATÓRIOS E IMPRESSÃO (AJUSTADOS) ---
+    function imprimirCupom(idx) {
+        const it = db_lancamentos[idx];
+        const win = window.open('', '', 'width=350,height=600');
+        
+        win.document.write(`
+            <html>
+            <head>
+                <style>
+                    @page { margin: 0; }
+                    body { 
+                        width: 75mm; font-family: 'Courier New', monospace; 
+                        padding: 5mm; margin: 0; font-size: 12px; color: #000;
+                    }
+                    .txt-centro { text-align: center; }
+                    .negrito { font-weight: bold; }
+                    .separador { border-top: 1px dashed #000; margin: 7px 0; }
+                    .linha-dupla { display: flex; justify-content: space-between; margin: 2px 0; }
+                    .titulo { font-size: 16px; margin-bottom: 5px; }
+                </style>
+            </head>
+            <body>
+                <div class="txt-centro negrito titulo">SISTEMA COLMÉIA</div>
+                <div class="txt-centro">RELATÓRIO DE LANÇAMENTO</div>
+                <div class="separador"></div>
+                
+                <div class="linha-dupla"><span>DATA:</span> <span>${it.dataBR}</span></div>
+                <div class="linha-dupla"><span>COMPRADOR:</span> <span>${it.comprador}</span></div>
+                <div class="linha-dupla"><span>FORN:</span> <span>${it.fornecedor || '---'}</span></div>
+                
+                <div class="separador"></div>
+                <div class="negrito">${it.nome}</div>
+                <div class="linha-dupla"><span>QUANTIDADE:</span> <span>${it.qtd}</span></div>
+                <div class="linha-dupla"><span>CUSTO UN:</span> <span>R$ ${it.custo.toFixed(2)}</span></div>
+                <div class="linha-dupla"><span>GASTO EX UN:</span> <span>R$ ${it.gasto.toFixed(2)}</span></div>
+                <div class="linha-dupla"><span>VENDA UN:</span> <span>R$ ${it.venda.toFixed(2)}</span></div>
+                
+                <div class="separador"></div>
+                <div class="linha-dupla negrito"><span>LUCRO UN:</span> <span>R$ ${it.lucroUn.toFixed(2)}</span></div>
+                <div class="linha-dupla negrito"><span>LUCRO TOTAL:</span> <span>R$ ${it.lucroTot.toFixed(2)}</span></div>
+                <div class="linha-dupla negrito" style="font-size: 14px; margin-top: 5px;">
+                    <span>VALOR TOTAL:</span> <span>R$ ${(it.venda * it.qtd).toFixed(2)}</span>
+                </div>
+                
+                <div class="separador"></div>
+                <div class="txt-centro" style="margin-top: 10px;">
+                    Impressão em: ${new Date().toLocaleString('pt-BR')}<br>
+                    *** FIM DO RELATÓRIO ***
+                </div>
+            </body>
+            </html>
+        `);
+        
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); win.close(); }, 300);
+    }
+
+    function imprimirLista() {
+        const marcados = document.querySelectorAll('.chk-item:checked');
+        if (marcados.length === 0) return alert("Selecione os itens na tabela para gerar o relatório.");
+
+        let totalLucroGeral = 0;
+        let totalCustoGeral = 0;
+        let linhasHtml = "";
+
+        marcados.forEach(c => {
+            const it = db_lancamentos[c.value];
+            totalLucroGeral += it.lucroTot;
+            totalCustoGeral += (it.custo + it.gasto) * it.qtd;
+
+            linhasHtml += `
+                <tr>
+                    <td>${it.dataBR}</td>
+                    <td>${it.comprador}</td>
+                    <td>${it.fornecedor || '---'}</td>
+                    <td>${it.nome}</td>
+                    <td style="text-align:center">${it.qtd}</td>
+                    <td>R$ ${it.custo.toFixed(2)}</td>
+                    <td>R$ ${it.venda.toFixed(2)}</td>
+                    <td>R$ ${it.gasto.toFixed(2)}</td>
+                    <td style="font-weight:bold; color:#1a73e8">R$ ${it.lucroUn.toFixed(2)}</td>
+                    <td style="font-weight:bold">R$ ${it.lucroTot.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        const win = window.open('', '', 'width=1100,height=700');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Relatório Geral Colméia</title>
+                <style>
+                    @page { size: landscape; margin: 10mm; }
+                    body { font-family: sans-serif; font-size: 12px; color: #333; }
+                    h2 { text-align: center; color: #1a73e8; text-transform: uppercase; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th { background: #f1f3f4; padding: 10px; border: 1px solid #ccc; font-size: 10px; text-transform: uppercase; }
+                    td { padding: 8px; border: 1px solid #ccc; }
+                    .totais-box { margin-top: 30px; border-top: 2px solid #1a73e8; padding-top: 10px; display: flex; justify-content: flex-end; gap: 40px; }
+                    .total-item { text-align: right; }
+                    .total-item span { display: block; font-size: 10px; color: #666; }
+                    .total-item strong { font-size: 16px; color: #1a73e8; }
+                </style>
+            </head>
+            <body>
+                <h2>Relatório Consolidado de Lançamentos</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Comprador</th>
+                            <th>Fornecedor</th>
+                            <th>Produto</th>
+                            <th>Qtd</th>
+                            <th>Custo Un</th>
+                            <th>Venda Un</th>
+                            <th>Gasto Ex</th>
+                            <th>Lucro Un</th>
+                            <th>Lucro Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasHtml}
+                    </tbody>
+                </table>
+                
+                <div class="totais-box">
+                    <div class="total-item">
+                        <span>CUSTO + GASTOS EXTR. ACUMULADOS</span>
+                        <strong>R$ ${totalCustoGeral.toFixed(2)}</strong>
+                    </div>
+                    <div class="total-item">
+                        <span>LUCRO TOTAL LÍQUIDO</span>
+                        <strong>R$ ${totalLucroGeral.toFixed(2)}</strong>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+
+    // --- OUTROS UTILITÁRIOS ---
     function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-    function excluirItem(idx) { if(confirm("Excluir definitivamente?")) { db_lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos)); renderizarTabela(); } }
+    function excluirItem(idx) { if(confirm("Deseja excluir permanentemente este lançamento?")) { db_lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos)); renderizarTabela(); } }
     function limparCamposProd() { document.getElementById('prodBusca').value = ""; document.getElementById('labelProd').innerText = ""; document.getElementById('prodQtd').value = ""; document.getElementById('prodCusto').value = ""; document.getElementById('prodVenda').value = ""; document.getElementById('prodGasto').value = "0"; }
     function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
+    
     function atualizarSelects() {
         const hC = '<option value="">Comprador: Selecione</option>' + db_compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
         document.getElementById('loteComp').innerHTML = hC;
         document.getElementById('filtroComp').innerHTML = '<option value="">Comprador: Todos</option>' + db_compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
         document.getElementById('filtroForn').innerHTML = '<option value="">Fornecedor: Todos</option>' + db_fornecedores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-    }
-    function imprimirCupom(idx) {
-        const it = db_lancamentos[idx];
-        const win = window.open('', '', 'width=300');
-        win.document.write(`CUPOM: ${it.nome} | QTD: ${it.qtd} | VALOR: R$ ${(it.venda * it.qtd).toFixed(2)}`);
-        win.print(); win.close();
-    }
-    function imprimirLista() {
-        const marcados = document.querySelectorAll('.chk-item:checked');
-        if(marcados.length === 0) return alert("Selecione itens na tabela.");
-        let h = `<h2>Relatório</h2><table border="1" width="100%"><tr><th>Data</th><th>Produto</th><th>Lucro Total</th></tr>`;
-        marcados.forEach(c => { const it = db_lancamentos[c.value]; h += `<tr><td>${it.dataBR}</td><td>${it.nome}</td><td>R$ ${it.lucroTot.toFixed(2)}</td></tr>`; });
-        const win = window.open('', '', 'width=800');
-        win.document.write(h + `</table>`); win.print();
     }
 </script>
 </body>
