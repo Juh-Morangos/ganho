@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v8.6 - Com Menu Dashboard</title>
+    <title>Sistema Colméia v8.7 - Correção Abacate</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background-color: #f4f7f6; margin: 0; padding: 0; }
@@ -26,7 +26,7 @@
         .btn-comprador { background-color: #ff6b6b; }
         .btn-fornecedor { background-color: #fbbc05; color: #333; }
         .btn-imprimir { background-color: #6c757d; }
-        .btn-dashboard { background-color: #8e44ad; } /* Cor roxa combinando com o Dashboard */
+        .btn-dashboard { background-color: #8e44ad; }
         .btn-finalizar { background-color: #1a73e8; width: 100%; padding: 15px; margin-top: 20px; font-size: 16px; font-weight: bold; }
 
         .btn-acao { padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; color: white; margin-right: 2px; }
@@ -59,7 +59,7 @@
 
 <header>
     <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Lançamentos</h1>
+    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - Pro v8.7</h1>
 </header>
 
 <main>
@@ -125,7 +125,7 @@
         <div class="form-grid" style="background:#fff; border: 1px solid #ddd;">
             <div class="form-group" style="grid-column: span 2;">
                 <label>Produto:</label>
-                <input type="text" id="prodBusca" class="nav" onblur="buscarProduto()">
+                <input type="text" id="prodBusca" class="nav" autocomplete="off" onblur="buscarProduto()">
                 <span id="labelProd" style="font-size:11px; color:#1a73e8; font-weight:bold; display:block; margin-top:2px;"></span>
             </div>
             <div class="form-group">
@@ -210,28 +210,34 @@
         renderizarTabela();
     };
 
-    // Navegação Enter
+    // Navegação Enter Corrigida (Previne disparos duplicados)
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             const inputs = Array.from(document.querySelectorAll('.nav'));
             const idx = inputs.indexOf(document.activeElement);
             if(idx > -1) {
                 e.preventDefault();
-                if(document.activeElement.id === 'prodGasto') processarBotaoItem();
-                else if(inputs[idx+1]) inputs[idx+1].focus();
+                e.stopPropagation(); // Evita herança de evento
+                if(document.activeElement.id === 'prodGasto') {
+                    processarBotaoItem();
+                } else if(inputs[idx+1]) {
+                    inputs[idx+1].focus();
+                }
             }
         }
     });
 
-    // Funções de Busca
+    // --- FUNÇÕES DE BUSCA ---
     function buscarFornecedor() {
         const t = document.getElementById('loteFornBusca').value.toLowerCase().trim();
+        if(!t) { document.getElementById('labelForn').innerText = ""; return; }
         const f = db_fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
         document.getElementById('labelForn').innerText = f ? f.nome : "Não cadastrado";
     }
 
     function buscarProduto() {
         const t = document.getElementById('prodBusca').value.toLowerCase().trim();
+        if(!t) { document.getElementById('labelProd').innerText = ""; return; }
         const p = db_produtos.find(i => i.cod.toLowerCase() === t || i.nome.toLowerCase().includes(t));
         if(p) {
             document.getElementById('prodBusca').value = p.cod;
@@ -242,7 +248,7 @@
         }
     }
 
-    // Lógica Lote
+    // --- LÓGICA DO MODAL ---
     function abrirModalLote() {
         document.getElementById('modalLote').style.display = 'block';
         document.getElementById('modalTitulo').innerText = "Novo Lote";
@@ -257,14 +263,17 @@
 
     function processarBotaoItem() {
         const idxEdit = document.getElementById('editIndex').value;
-        const cod = document.getElementById('prodBusca').value;
+        const cod = document.getElementById('prodBusca').value.trim();
         const nome = document.getElementById('labelProd').innerText;
         const qtd = parseFloat(document.getElementById('prodQtd').value);
         const custo = parseFloat(document.getElementById('prodCusto').value) || 0;
         const venda = parseFloat(document.getElementById('prodVenda').value) || 0;
         const gasto = parseFloat(document.getElementById('prodGasto').value) || 0;
 
-        if(!cod || !qtd || nome === "Não encontrado" || nome === "") return alert("Produto e Qtd obrigatórios!");
+        if(!cod || !qtd || nome === "Não encontrado" || nome === "") {
+            alert("Erro: Certifique-se de preencher um Produto válido e uma Quantidade.");
+            return;
+        }
 
         const lUn = venda - (custo + gasto);
         const lTot = lUn * qtd;
@@ -276,7 +285,11 @@
             localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos));
             renderizarTabela(); fecharModal('modalLote');
         } else {
-            carrinho_temp.push(item); renderizarCarrinho(); limparCamposProd(); document.getElementById('prodBusca').focus();
+            carrinho_temp.push(item); 
+            renderizarCarrinho(); 
+            limparCamposProd(); 
+            // Pequeno delay para garantir que o foco limpo não resgate lixos de memória
+            setTimeout(() => document.getElementById('prodBusca').focus(), 50);
         }
     }
 
@@ -406,16 +419,4 @@
     function listarCadastro(tipo) { const lista = tipo === 'compradores' ? db_compradores : db_fornecedores; document.getElementById('listaCad').innerHTML = lista.map((i, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>${i.nome}</span><button onclick="removerCad('${tipo}',${idx})" style="color:red; border:none; background:none; cursor:pointer">X</button></div>`).join(''); }
     function removerCad(t, i) { const l = t === 'compradores' ? db_compradores : db_fornecedores; l.splice(i,1); localStorage.setItem(t, JSON.stringify(l)); atualizarSelects(); listarCadastro(t); }
     function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-    function excluirItem(idx) { if(confirm("Excluir?")) { db_lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(db_lancamentos)); renderizarTabela(); } }
-    function limparCamposProd() { document.getElementById('prodBusca').value = ""; document.getElementById('labelProd').innerText = ""; document.getElementById('prodQtd').value = ""; document.getElementById('prodCusto').value = ""; document.getElementById('prodVenda').value = ""; document.getElementById('prodGasto').value = "0"; }
-    function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
-    function atualizarSelects() {
-        const c = db_compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-        const f = db_fornecedores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-        document.getElementById('loteComp').innerHTML = '<option value="">Selecione</option>' + c;
-        document.getElementById('filtroComp').innerHTML = '<option value="">Comprador: Todos</option>' + c;
-        document.getElementById('filtroForn').innerHTML = '<option value="">Fornecedor: Todos</option>' + f;
-    }
-</script>
-</body>
-</html>
+    function excluirItem(idx) { if(confirm("Excluir?")) { db_
