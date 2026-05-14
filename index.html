@@ -3,406 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Colméia v6.0 - Carrinho Detalhado</title>
-    
+    <title>Sistema Colméia v7.0 - Estável</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; margin: 0; padding: 0; }
-        header { background-color: #1a73e8; color: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
-        main { max-width: 1550px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        body { background-color: #f0f2f5; margin: 0; padding: 0; color: #333; }
         
-        .controles { display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; background: #fff; border-radius: 8px; }
-        .filtros-grupo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .controles-acoes { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        /* Header */
+        header { background-color: #1a73e8; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        select, input[type="date"], input[type="text"], input[type="number"] { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 13px; }
-
-        .btn { border: none; padding: 10px 15px; font-size: 13px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; color: white; text-decoration: none; text-align: center; }
+        /* Layout Principal */
+        main { max-width: 98%; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Barra de Ferramentas */
+        .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .filtros { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        
+        /* Botões */
+        .btn { border: none; padding: 10px 15px; font-size: 13px; cursor: pointer; border-radius: 6px; font-weight: bold; color: white; transition: 0.2s; }
         .btn-novo { background-color: #34a853; }
+        .btn-comprador { background-color: #ff6b6b; }
         .btn-fornecedor { background-color: #fbbc05; color: #333; }
-        .btn-comprador { background-color: #ff6b6b; color: white; }
         .btn-imprimir { background-color: #6c757d; }
-        .btn-salvar { background-color: #1a73e8; width: 100%; padding: 15px; margin-top: 15px; font-size: 18px; }
-        
-        .btn-acao { padding: 6px 10px; font-size: 13px; margin-right: 3px; border-radius: 4px; border: none; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; }
-        .btn-cupom { background-color: #17a2b8; }
+        .btn-acao { padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; color: white; margin-right: 2px; }
         .btn-editar { background-color: #fbbc05; color: #333; }
         .btn-excluir { background-color: #ea4335; }
+        .btn-cupom { background-color: #17a2b8; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-        th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
-        th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 10px; }
+        /* Tabela Principal */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background-color: #f1f3f4; color: #5f6368; font-size: 11px; text-transform: uppercase; }
+        tr:hover { background-color: #fcfcfc; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto; }
-        .modal-content { background-color: #fff; margin: 1% auto; padding: 25px; width: 95%; max-width: 1200px; border-radius: 12px; position: relative; }
-        .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #555; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #dadce0; border-radius: 4px; font-size: 13px; }
-        
-        .info-busca { display: block; font-size: 11px; color: #1a73e8; margin-top: 3px; font-weight: bold; min-height: 15px; }
-        .carrinho-container { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; max-height: 250px; overflow-y: auto; background: white; }
+        /* Modais */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; }
+        .modal-content { background: #fff; margin: 2% auto; padding: 25px; width: 95%; max-width: 1200px; border-radius: 12px; position: relative; animation: slideIn 0.3s; }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #666; }
+
+        /* Formulários no Modal */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #eef0f2; border-radius: 8px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px; color: #666; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        input:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 0 2px rgba(26,115,232,0.1); }
+
+        /* Carrinho dentro do Modal */
+        .carrinho-box { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .carrinho-box table { margin-top: 0; }
+        .carrinho-box thead { background: #f8f9fa; }
+        .carrinho-scroll { max-height: 200px; overflow-y: auto; }
+
+        .btn-finalizar { background-color: #1a73e8; width: 100%; padding: 18px; margin-top: 20px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
-        <h1 style="margin: 0; font-size: 20px;">Sistema Colméia - Lançamento Detalhado</h1>
-    </header>
+<header>
+    <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 40px;">
+    <h1 style="margin:0; font-size: 20px;">Sistema Colméia - ERP v7.0</h1>
+</header>
 
-    <main>
-        <div class="controles">
-            <div class="filtros-grupo">
-                <input type="date" id="filtroDataInicio" onchange="renderizarTabela()"> até 
-                <input type="date" id="filtroDataFim" onchange="renderizarTabela()">
-                <select id="filtroComprador" onchange="renderizarTabela()"><option value="">Todos Compradores</option></select>
-                <select id="filtroFornecedor" onchange="renderizarTabela()"><option value="">Todos Fornecedores</option></select>
-            </div>
-            <div class="controles-acoes">
-                <button class="btn btn-imprimir" onclick="imprimirSelecionados()">🖨️ Lista</button>
-                <button class="btn btn-comprador" onclick="abrirModalComprador()">👤 Compradores</button>
-                <button class="btn btn-fornecedor" onclick="abrirModalFornecedor()">👥 Fornecedores</button>
-                <button class="btn btn-novo" onclick="abrirModalLancamento()">+ Novo Lote</button>
-            </div>
+<main>
+    <div class="toolbar">
+        <div class="filtros">
+            <input type="date" id="filtroDataIn"> 
+            <span>até</span>
+            <input type="date" id="filtroDataFim">
+            <select id="filtroComp" onchange="renderizarTabela()"><option value="">Todos Compradores</option></select>
+            <select id="filtroForn" onchange="renderizarTabela()"><option value="">Todos Fornecedores</option></select>
         </div>
-
-        <table id="tabelaPrincipal">
-            <thead>
-                <tr>
-                    <th width="30"><input type="checkbox" id="chkTodos" onchange="selecionarTodos()"></th>
-                    <th>Data</th>
-                    <th>Comprador</th>
-                    <th>Fornecedor</th>
-                    <th>Produto</th>
-                    <th>Qtd</th>
-                    <th>Custo Un.</th>
-                    <th>Venda Un.</th>
-                    <th style="color: #1a73e8;">Lucro Un.</th>
-                    <th>Lucro Total</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="listaGeral"></tbody>
-        </table>
-    </main>
-
-    <!-- MODAL DE LANÇAMENTO -->
-    <div id="modalLancamento" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
-            <h2 id="tituloModal" style="color: #1a73e8; margin-top:0">Novo Lote</h2>
-            <input type="hidden" id="editIndexGlobal" value="">
-
-            <div class="form-grid" style="margin-bottom: 15px; background: #fff;">
-                <div class="form-group">
-                    <label>Data:</label>
-                    <input type="date" id="dataLote" class="input-nav">
-                </div>
-                <div class="form-group">
-                    <label>Comprador:</label>
-                    <select id="selComprador" class="input-nav"></select>
-                </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Fornecedor (Cód ou Nome):</label>
-                    <input type="text" id="codFornecedor" class="input-nav" onblur="buscarFornecedor()">
-                    <span id="nomeFornecedor" class="info-busca"></span>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Produto:</label>
-                    <input type="text" id="codProduto" class="input-nav" onblur="buscarProduto()">
-                    <span id="nomeProduto" class="info-busca"></span>
-                </div>
-                <div class="form-group">
-                    <label>Qtd:</label>
-                    <input type="number" id="qtdItem" class="input-nav">
-                </div>
-                <div class="form-group">
-                    <label>Custo Un:</label>
-                    <input type="number" id="custoItem" class="input-nav" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>Venda Un:</label>
-                    <input type="number" id="vendaItem" class="input-nav" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>Gasto Ex:</label>
-                    <input type="number" id="gastoItem" class="input-nav" step="0.01" value="0">
-                </div>
-                <div class="form-group" style="display:flex; align-items:flex-end;">
-                    <button type="button" id="btnAcaoInterna" class="btn btn-novo" style="width:100%" onclick="processarBotaoItem()">+ Adicionar</button>
-                </div>
-            </div>
-
-            <!-- CARRINHO COM INFORMAÇÕES COMPLETAS (Conforme imagem image_a30192.png) -->
-            <div class="carrinho-container" id="areaCarrinho">
-                <table style="margin-top:0">
-                    <thead style="position: sticky; top: 0; background: #eee; z-index: 10;">
-                        <tr>
-                            <th>Produto</th>
-                            <th>Qtd</th>
-                            <th>Custo Un</th>
-                            <th>Venda Un</th>
-                            <th>Gasto Ex</th>
-                            <th>Lucro Un</th>
-                            <th>Lucro Total</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoCarrinho"></tbody>
-                </table>
-            </div>
-
-            <button class="btn btn-salvar" id="btnFinalizar" onclick="salvarLoteCompleto()">GRAVAR LANÇAMENTOS</button>
+        <div class="controles-acoes">
+            <button class="btn btn-imprimir" onclick="imprimirLista()">🖨️ Lista</button>
+            <button class="btn btn-comprador" onclick="abrirModalBasico('compradores')">👤 Compradores</button>
+            <button class="btn btn-fornecedor" onclick="abrirModalBasico('fornecedores')">👥 Fornecedores</button>
+            <button class="btn btn-novo" onclick="abrirModalLote()">+ Novo Lote</button>
         </div>
     </div>
 
-    <!-- MODAIS DE CADASTRO -->
-    <div id="modalCompradores" class="modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <span class="close" onclick="fecharModal('modalCompradores')">&times;</span>
-            <h2>Cadastro de Compradores</h2>
-            <input type="text" id="compNome" placeholder="Nome do Comprador" style="width:100%; margin-bottom:10px">
-            <button class="btn btn-novo" style="width:100%" onclick="cadastrarComprador()">Salvar Comprador</button>
-            <div id="listaCompCadastrados" style="margin-top:15px"></div>
-        </div>
-    </div>
+    <table id="tabelaPrincipal">
+        <thead>
+            <tr>
+                <th width="30"><input type="checkbox" id="chkTodos" onchange="selecionarTodos()"></th>
+                <th>Data</th>
+                <th>Comprador</th>
+                <th>Fornecedor</th>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Custo Un.</th>
+                <th>Venda Un.</th>
+                <th style="color:#1a73e8">Lucro Un.</th>
+                <th>Lucro Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="corpoTabelaPrincipal"></tbody>
+    </table>
+</main>
 
-    <div id="modalFornecedores" class="modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
-            <h2>Cadastro de Fornecedores</h2>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input type="text" id="fornCod" placeholder="Cód" style="width:30%">
-                <input type="text" id="fornNome" placeholder="Nome" style="width:70%">
+<!-- MODAL DE LANÇAMENTO (BASIADO NA IMAGE_A30192.PNG) -->
+<div id="modalLote" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalLote')">&times;</span>
+        <h2 id="modalTitulo" style="color: #1a73e8; margin-top:0;">Novo Lote</h2>
+        
+        <input type="hidden" id="editIndexGlobal" value="">
+
+        <!-- Linha 1: Dados do Lote -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Data:</label>
+                <input type="date" id="loteData" class="nav">
             </div>
-            <button class="btn btn-novo" style="width:100%" onclick="cadastrarFornecedor()">Salvar Fornecedor</button>
-            <div id="listaFornCadastrados" style="margin-top:15px"></div>
+            <div class="form-group">
+                <label>Comprador:</label>
+                <select id="loteComprador" class="nav"></select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Fornecedor (Cód ou Nome):</label>
+                <input type="text" id="loteFornecedor" class="nav" onblur="buscarFornManual()">
+                <span id="nomeFornDisplay" style="font-size:11px; color:#1a73e8; font-weight:bold"></span>
+            </div>
         </div>
+
+        <!-- Linha 2: Dados do Produto -->
+        <div class="form-grid" style="background:#fff; border: 1px solid #ddd;">
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Produto:</label>
+                <input type="text" id="prodBusca" class="nav" onblur="buscarProdManual()">
+                <span id="nomeProdDisplay" style="font-size:11px; color:#1a73e8; font-weight:bold"></span>
+            </div>
+            <div class="form-group">
+                <label>Qtd:</label>
+                <input type="number" id="prodQtd" class="nav">
+            </div>
+            <div class="form-group">
+                <label>Custo Un:</label>
+                <input type="number" id="prodCusto" class="nav" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Venda Un:</label>
+                <input type="number" id="prodVenda" class="nav" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Gasto Ex:</label>
+                <input type="number" id="prodGasto" class="nav" step="0.01" value="0">
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+                <button type="button" id="btnAddItem" class="btn btn-novo" style="width:100%" onclick="acaoBotaoItem()">+ Adicionar</button>
+            </div>
+        </div>
+
+        <!-- Carrinho Detalhado -->
+        <div class="carrinho-box" id="boxCarrinho">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Custo Un</th>
+                        <th>Venda Un</th>
+                        <th>Gasto Ex</th>
+                        <th style="color:#1a73e8">Lucro Un</th>
+                        <th>Lucro Total</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoCarrinhoModal"></tbody>
+            </table>
+        </div>
+
+        <button class="btn btn-finalizar" id="btnSalvarTudo" onclick="finalizarLote()">Gravar Lançamentos</button>
     </div>
+</div>
 
-    <script>
-        const PLANILHA_ID = '1cl89xjWPjxyULh4Jw5XZc89uO057pDPaivUKSCiy-xM';
-        const URL_DADOS = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, E`;
+<!-- MODAL BÁSICO (CADASTROS) -->
+<div id="modalBasico" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+        <span class="close" onclick="fecharModal('modalBasico')">&times;</span>
+        <h2 id="tituloBasico">Cadastro</h2>
+        <div id="formBasico"></div>
+        <div id="listaBasica" style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;"></div>
+    </div>
+</div>
 
-        let listaProdutosAPI = [];
-        let fornecedores = JSON.parse(localStorage.getItem('fornecedores')) || [];
-        let compradores = JSON.parse(localStorage.getItem('compradores')) || [];
-        let lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
-        let carrinhoTemporario = [];
+<script>
+    // Configurações e Dados
+    const PLANILHA_ID = '1cl89xjWPjxyULh4Jw5XZc89uO057pDPaivUKSCiy-xM';
+    const URL_DADOS = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tq=SELECT A, B, E`;
+    
+    let produtosAPI = [];
+    let fornecedores = JSON.parse(localStorage.getItem('fornecedores')) || [];
+    let compradores = JSON.parse(localStorage.getItem('compradores')) || [];
+    let lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
+    let carrinho = [];
 
-        window.onload = () => {
-            carregarDadosAPI();
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('filtroDataInicio').value = hoje;
-            document.getElementById('filtroDataFim').value = hoje;
-            atualizarSelectsFiltro();
-            renderizarTabela();
-        };
+    window.onload = async () => {
+        carregarAPI();
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('filtroDataIn').value = hoje;
+        document.getElementById('filtroDataFim').value = hoje;
+        atualizarSelects();
+        renderizarTabela();
+    };
 
-        async function carregarDadosAPI() {
-            try {
-                const res = await fetch(URL_DADOS);
-                const text = await res.text();
-                const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
-                listaProdutosAPI = json.table.rows.map(r => ({
-                    codigo: r.c[0] ? r.c[0].v.toString() : '',
-                    nome: r.c[1] ? r.c[1].v : '',
-                    preco: r.c[2] ? parseFloat(r.c[2].v) : 0
-                }));
-            } catch (e) { console.error("Erro API:", e); }
-        }
+    async function carregarAPI() {
+        try {
+            const res = await fetch(URL_DADOS);
+            const text = await res.text();
+            const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
+            produtosAPI = json.table.rows.map(r => ({
+                cod: r.c[0] ? r.c[0].v.toString() : '',
+                nome: r.c[1] ? r.c[1].v : '',
+                preco: r.c[2] ? parseFloat(r.c[2].v) : 0
+            }));
+        } catch(e) { console.error("Erro na Planilha", e); }
+    }
 
-        // --- LÓGICA DE LANÇAMENTO E CARRINHO DETALHADO ---
-        function adicionarAoCarrinho() {
-            const cp = document.getElementById('codProduto').value;
-            const np = document.getElementById('nomeProduto').innerText;
-            const qt = parseFloat(document.getElementById('qtdItem').value);
-            if(!cp || !qt) return alert("Produto e Qtd obrigatórios!");
-
-            const ci = parseFloat(document.getElementById('custoItem').value) || 0;
-            const vi = parseFloat(document.getElementById('vendaItem').value) || 0;
-            const gi = parseFloat(document.getElementById('gastoItem').value) || 0;
-            const lUn = vi - (ci + gi);
-
-            carrinhoTemporario.push({
-                codProduto: cp, nomeProduto: np, qtd: qt, custoUn: ci, vendaUn: vi, gastoExUn: gi, 
-                custoTotalItem: (ci + gi) * qt, lucroTotalItem: lUn * qt, lucroUn: lUn
-            });
-
-            limparCamposProduto();
-            atualizarCarrinhoUI();
-            document.getElementById('codProduto').focus();
-        }
-
-        function atualizarCarrinhoUI() {
-            document.getElementById('corpoCarrinho').innerHTML = carrinhoTemporario.map((it, idx) => `
-                <tr>
-                    <td>${it.nomeProduto}</td>
-                    <td>${it.qtd}</td>
-                    <td>R$ ${it.custoUn.toFixed(2)}</td>
-                    <td>R$ ${it.vendaUn.toFixed(2)}</td>
-                    <td>R$ ${it.gastoExUn.toFixed(2)}</td>
-                    <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
-                    <td style="font-weight:bold">R$ ${it.lucroTotalItem.toFixed(2)}</td>
-                    <td><button class="btn-excluir" onclick="carrinhoTemporario.splice(${idx},1); atualizarCarrinhoUI()">✕</button></td>
-                </tr>`).join('');
-        }
-
-        function processarBotaoItem() {
-            const idxEdit = document.getElementById('editIndexGlobal').value;
-            if (idxEdit !== "") {
-                const dt = document.getElementById('dataLote').value;
-                const comp = document.getElementById('selComprador').value;
-                const cf = document.getElementById('codFornecedor').value;
-                const nf = document.getElementById('nomeFornecedor').innerText;
-
-                const qt = parseFloat(document.getElementById('qtdItem').value);
-                const ci = parseFloat(document.getElementById('custoItem').value) || 0;
-                const vi = parseFloat(document.getElementById('vendaItem').value) || 0;
-                const gi = parseFloat(document.getElementById('gastoItem').value) || 0;
-                const lUn = vi - (ci + gi);
-
-                lancamentos[idxEdit] = {
-                    dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, codFornecedor: cf, nomeFornecedor: nf,
-                    codProduto: document.getElementById('codProduto').value, nomeProduto: document.getElementById('nomeProduto').innerText,
-                    qtd: qt, custoUn: ci, vendaUn: vi, gastoExUn: gi, custoTotalItem: (ci + gi) * qt, lucroTotalItem: lUn * qt, lucroUn: lUn, lucro: lUn * qt
-                };
-
-                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
-                renderizarTabela();
-                fecharModal('modalLancamento');
-                alert("Alterado com sucesso!");
-            } else {
-                adicionarAoCarrinho();
+    // Navegação por Enter
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+            const inputs = Array.from(document.querySelectorAll('.nav'));
+            const idx = inputs.indexOf(document.activeElement);
+            if(idx > -1) {
+                e.preventDefault();
+                if(document.activeElement.id === 'prodGasto') acaoBotaoItem();
+                else if(inputs[idx+1]) inputs[idx+1].focus();
             }
         }
+    });
 
-        function salvarLoteCompleto() {
-            const dt = document.getElementById('dataLote').value;
-            const comp = document.getElementById('selComprador').value;
-            const nf = document.getElementById('nomeFornecedor').innerText;
-            if(!dt || !comp || carrinhoTemporario.length === 0) return alert("Dados incompletos!");
+    // Funções do Modal de Lote
+    function abrirModalLote() {
+        document.getElementById('modalLote').style.display = 'block';
+        document.getElementById('modalTitulo').innerText = "Novo Lote";
+        document.getElementById('editIndexGlobal').value = "";
+        document.getElementById('boxCarrinho').style.display = 'block';
+        document.getElementById('btnSalvarTudo').style.display = 'block';
+        document.getElementById('btnAddItem').innerText = "+ Adicionar";
+        
+        carrinho = [];
+        atualizarCarrinhoUI();
+        limparCamposProd();
+        
+        document.getElementById('loteData').value = new Date().toISOString().split('T')[0];
+        setTimeout(() => document.getElementById('loteComprador').focus(), 100);
+    }
 
-            carrinhoTemporario.forEach(it => {
-                lancamentos.unshift({ dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), comprador: comp, nomeFornecedor: nf, ...it, lucro: it.lucroTotalItem });
-            });
+    function buscarFornManual() {
+        const t = document.getElementById('loteFornecedor').value.toLowerCase().trim();
+        const f = fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
+        document.getElementById('nomeFornDisplay').innerText = f ? f.nome : "Não cadastrado";
+    }
+
+    function buscarProdManual() {
+        const t = document.getElementById('prodBusca').value.toLowerCase().trim();
+        const p = produtosAPI.find(i => i.cod.toLowerCase() === t || i.nome.toLowerCase().includes(t));
+        if(p) {
+            document.getElementById('prodBusca').value = p.cod;
+            document.getElementById('nomeProdDisplay').innerText = p.nome;
+            document.getElementById('prodVenda').value = p.preco;
+        }
+    }
+
+    function acaoBotaoItem() {
+        const idxEdit = document.getElementById('editIndexGlobal').value;
+        const cod = document.getElementById('prodBusca').value;
+        const nome = document.getElementById('nomeProdDisplay').innerText;
+        const qtd = parseFloat(document.getElementById('prodQtd').value);
+        const custo = parseFloat(document.getElementById('prodCusto').value) || 0;
+        const venda = parseFloat(document.getElementById('prodVenda').value) || 0;
+        const gasto = parseFloat(document.getElementById('prodGasto').value) || 0;
+
+        if(!cod || !qtd) return alert("Produto e Qtd obrigatórios!");
+
+        const lUn = venda - (custo + gasto);
+        const lTot = lUn * qtd;
+        
+        const itemObj = { cod, nome, qtd, custo, venda, gasto, lucroUn: lUn, lucroTotal: lTot };
+
+        if(idxEdit !== "") {
+            // Lógica de Edição Direta na Tabela
+            const dt = document.getElementById('loteData').value;
+            lancamentos[idxEdit] = {
+                ...itemObj,
+                dataRAW: dt,
+                dataBR: dt.split('-').reverse().join('/'),
+                comprador: document.getElementById('loteComprador').value,
+                fornecedor: document.getElementById('nomeFornDisplay').innerText
+            };
             localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
             renderizarTabela();
-            fecharModal('modalLancamento');
+            fecharModal('modalLote');
+        } else {
+            // Lógica de Carrinho
+            carrinho.push(itemObj);
+            atualizarCarrinhoUI();
+            limparCamposProd();
+            document.getElementById('prodBusca').focus();
         }
+    }
 
-        // --- NAVEGAÇÃO E BUSCA ---
-        function buscarFornecedor() {
-            const t = document.getElementById('codFornecedor').value.toLowerCase().trim();
-            const f = fornecedores.find(i => i.id.toLowerCase() === t || i.nome.toLowerCase().includes(t));
-            if(f) { document.getElementById('codFornecedor').value = f.id; document.getElementById('nomeFornecedor').innerText = f.nome; }
-        }
+    function atualizarCarrinhoUI() {
+        const tbody = document.getElementById('corpoCarrinhoModal');
+        tbody.innerHTML = carrinho.map((it, idx) => `
+            <tr>
+                <td>${it.nome}</td>
+                <td>${it.qtd}</td>
+                <td>R$ ${it.custo.toFixed(2)}</td>
+                <td>R$ ${it.venda.toFixed(2)}</td>
+                <td>R$ ${it.gasto.toFixed(2)}</td>
+                <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
+                <td style="font-weight:bold">R$ ${it.lucroTotal.toFixed(2)}</td>
+                <td><button class="btn-excluir" onclick="carrinho.splice(${idx},1); atualizarCarrinhoUI()">✕</button></td>
+            </tr>
+        `).join('');
+    }
 
-        function buscarProduto() {
-            const t = document.getElementById('codProduto').value.toLowerCase().trim();
-            const p = listaProdutosAPI.find(i => i.codigo.toLowerCase() === t || i.nome.toLowerCase().includes(t));
-            if(p) { document.getElementById('codProduto').value = p.codigo; document.getElementById('nomeProduto').innerText = p.nome; document.getElementById('vendaItem').value = p.preco; }
-        }
+    function finalizarLote() {
+        const dt = document.getElementById('loteData').value;
+        const comp = document.getElementById('loteComprador').value;
+        const forn = document.getElementById('nomeFornDisplay').innerText;
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const nav = Array.from(document.querySelectorAll('.input-nav'));
-                const idx = nav.indexOf(document.activeElement);
-                if (idx > -1) {
-                    e.preventDefault();
-                    if (document.activeElement.id === 'gastoItem') processarBotaoItem();
-                    else nav[idx + 1].focus();
-                }
-            }
+        if(!dt || !comp || carrinho.length === 0) return alert("Preencha todos os dados do lote!");
+
+        carrinho.forEach(it => {
+            lancamentos.unshift({
+                ...it,
+                dataRAW: dt,
+                dataBR: dt.split('-').reverse().join('/'),
+                comprador: comp,
+                fornecedor: forn
+            });
         });
 
-        // --- RENDERIZAÇÃO E FILTROS ---
-        function renderizarTabela() {
-            const tbody = document.getElementById('listaGeral');
-            tbody.innerHTML = "";
-            const fi = document.getElementById('filtroDataInicio').value;
-            const ff = document.getElementById('filtroDataFim').value;
-            const sC = document.getElementById('filtroComprador').value;
-            const sF = document.getElementById('filtroFornecedor').value;
+        localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+        renderizarTabela();
+        fecharModal('modalLote');
+    }
 
-            lancamentos.forEach((it, idx) => {
-                if(it.dataRAW >= fi && it.dataRAW <= ff && (!sC || it.comprador === sC) && (!sF || it.nomeFornecedor === sF)) {
-                    tbody.innerHTML += `<tr>
+    function alterarLancamento(idx) {
+        const it = lancamentos[idx];
+        abrirModalLote();
+        document.getElementById('modalTitulo').innerText = "Alterar Item";
+        document.getElementById('editIndexGlobal').value = idx;
+        document.getElementById('boxCarrinho').style.display = 'none';
+        document.getElementById('btnSalvarTudo').style.display = 'none';
+        document.getElementById('btnAddItem').innerText = "Confirmar Alteração";
+
+        document.getElementById('loteData').value = it.dataRAW;
+        document.getElementById('loteComprador').value = it.comprador;
+        document.getElementById('loteFornecedor').value = ""; // Busca manual requerida ou ID salvo
+        document.getElementById('nomeFornDisplay').innerText = it.fornecedor;
+        document.getElementById('prodBusca').value = it.cod;
+        document.getElementById('nomeProdDisplay').innerText = it.nome;
+        document.getElementById('prodQtd').value = it.qtd;
+        document.getElementById('prodCusto').value = it.custo;
+        document.getElementById('prodVenda').value = it.venda;
+        document.getElementById('prodGasto').value = it.gasto;
+    }
+
+    // Funções da Tabela Principal
+    function renderizarTabela() {
+        const tbody = document.getElementById('corpoTabelaPrincipal');
+        tbody.innerHTML = "";
+        const fIn = document.getElementById('filtroDataIn').value;
+        const fFim = document.getElementById('filtroDataFim').value;
+        const sComp = document.getElementById('filtroComp').value;
+        const sForn = document.getElementById('filtroForn').value;
+
+        lancamentos.forEach((it, idx) => {
+            if(it.dataRAW >= fIn && it.dataRAW <= fFim && (!sComp || it.comprador === sComp) && (!sForn || it.fornecedor === sForn)) {
+                tbody.innerHTML += `
+                    <tr>
                         <td><input type="checkbox" class="chk-item" value="${idx}"></td>
-                        <td>${it.dataBR}</td><td style="color:#ff6b6b; font-weight:bold">${it.comprador}</td>
-                        <td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td><td>${it.qtd}</td>
-                        <td>R$ ${it.custoUn.toFixed(2)}</td><td>R$ ${it.vendaUn.toFixed(2)}</td>
+                        <td>${it.dataBR}</td>
+                        <td style="color:#ff6b6b; font-weight:bold">${it.comprador}</td>
+                        <td>${it.fornecedor}</td>
+                        <td>${it.nome}</td>
+                        <td>${it.qtd}</td>
+                        <td>R$ ${it.custo.toFixed(2)}</td>
+                        <td>R$ ${it.venda.toFixed(2)}</td>
                         <td style="color:#1a73e8; font-weight:bold">R$ ${it.lucroUn.toFixed(2)}</td>
-                        <td style="color:${it.lucroTotalItem>=0?'green':'red'}; font-weight:bold">R$ ${it.lucroTotalItem.toFixed(2)}</td>
+                        <td style="color:${it.lucroTotal>=0?'green':'red'}; font-weight:bold">R$ ${it.lucroTotal.toFixed(2)}</td>
                         <td>
                             <button class="btn-acao btn-editar" onclick="alterarLancamento(${idx})">✎</button>
-                            <button class="btn-acao btn-excluir" onclick="if(confirm('Excluir?')){lancamentos.splice(${idx},1); localStorage.setItem('lancamentos',JSON.stringify(lancamentos)); renderizarTabela();}">✖</button>
-                        </td></tr>`;
-                }
-            });
-        }
+                            <button class="btn-acao btn-cupom" onclick="imprimirCupom(${idx})">🎫</button>
+                            <button class="btn-acao btn-excluir" onclick="excluirItem(${idx})">✖</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+    }
 
-        function alterarLancamento(idx) {
-            const it = lancamentos[idx];
-            abrirModalLancamento();
-            document.getElementById('tituloModal').innerText = "Alterar Lançamento";
-            document.getElementById('editIndexGlobal').value = idx;
-            document.getElementById('areaCarrinho').style.display = 'none';
-            document.getElementById('btnFinalizar').style.display = 'none';
-            document.getElementById('btnAcaoInterna').innerText = "Atualizar Item";
+    // Outros Utilitários
+    function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+    function limparCamposProd() { document.getElementById('prodBusca').value = ""; document.getElementById('nomeProdDisplay').innerText = ""; document.getElementById('prodQtd').value = ""; document.getElementById('prodCusto').value = ""; document.getElementById('prodVenda').value = ""; document.getElementById('prodGasto').value = "0"; }
+    function excluirItem(idx) { if(confirm("Deseja excluir?")) { lancamentos.splice(idx,1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela(); } }
+    function atualizarSelects() {
+        const cSel = document.getElementById('loteComprador');
+        const cfSel = document.getElementById('filtroComp');
+        const ffSel = document.getElementById('filtroForn');
+        const htmlC = '<option value="">Selecione...</option>' + compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+        cSel.innerHTML = htmlC;
+        cfSel.innerHTML = '<option value="">Todos Compradores</option>' + compradores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+        ffSel.innerHTML = '<option value="">Todos Fornecedores</option>' + fornecedores.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+    }
 
-            document.getElementById('dataLote').value = it.dataRAW;
-            document.getElementById('selComprador').value = it.comprador;
-            document.getElementById('codFornecedor').value = it.codFornecedor;
-            document.getElementById('nomeFornecedor').innerText = it.nomeFornecedor;
-            document.getElementById('codProduto').value = it.codProduto;
-            document.getElementById('nomeProduto').innerText = it.nomeProduto;
-            document.getElementById('qtdItem').value = it.qtd;
-            document.getElementById('custoItem').value = it.custoUn;
-            document.getElementById('vendaItem').value = it.vendaUn;
-            document.getElementById('gastoItem').value = it.gastoExUn;
-        }
+    // Modal de Cadastros Simples
+    function abrirModalBasico(tipo) {
+        document.getElementById('modalBasico').style.display = 'block';
+        const titulo = tipo === 'compradores' ? "Compradores" : "Fornecedores";
+        document.getElementById('tituloBasico').innerText = "Gestão de " + titulo;
+        
+        const placeholder = tipo === 'compradores' ? "Nome do Comprador" : "Nome do Fornecedor";
+        const extra = tipo === 'fornecedores' ? `<input type="text" id="cadID" placeholder="Código" style="margin-bottom:10px">` : "";
+        
+        document.getElementById('formBasico').innerHTML = `
+            ${extra}
+            <input type="text" id="cadNome" placeholder="${placeholder}">
+            <button class="btn btn-novo" style="width:100%; margin-top:10px" onclick="salvarCadastro('${tipo}')">Gravar</button>
+        `;
+        listarBasico(tipo);
+    }
 
-        // --- GESTÃO DE CADASTROS ---
-        function abrirModalLancamento() {
-            document.getElementById('modalLancamento').style.display = 'block';
-            document.getElementById('editIndexGlobal').value = "";
-            document.getElementById('areaCarrinho').style.display = 'block';
-            document.getElementById('btnFinalizar').style.display = 'block';
-            document.getElementById('btnAcaoInterna').innerText = "+ Adicionar";
-            document.getElementById('selComprador').innerHTML = '<option value="">Selecione...</option>' + compradores.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
-            carrinhoTemporario = []; atualizarCarrinhoUI();
-        }
+    function salvarCadastro(tipo) {
+        const nome = document.getElementById('cadNome').value;
+        const id = document.getElementById('cadID') ? document.getElementById('cadID').value : Date.now().toString();
+        if(!nome) return;
+        
+        const lista = tipo === 'compradores' ? compradores : fornecedores;
+        lista.push({id, nome});
+        localStorage.setItem(tipo, JSON.stringify(lista));
+        atualizarSelects();
+        listarBasico(tipo);
+    }
 
-        function cadastrarComprador() {
-            const nm = document.getElementById('compNome').value;
-            if(nm) { compradores.push({nome: nm}); localStorage.setItem('compradores', JSON.stringify(compradores)); document.getElementById('compNome').value = ""; listarCompradores(); atualizarSelectsFiltro(); }
-        }
+    function listarBasico(tipo) {
+        const lista = tipo === 'compradores' ? compradores : fornecedores;
+        document.getElementById('listaBasica').innerHTML = lista.map((i, idx) => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px">
+                <span>${i.nome}</span>
+                <button onclick="removerBasico('${tipo}', ${idx})" style="color:red; border:none; background:none; cursor:pointer">X</button>
+            </div>
+        `).join('');
+    }
 
-        function cadastrarFornecedor() {
-            const id = document.getElementById('fornCod').value;
-            const nm = document.getElementById('fornNome').value;
-            if(id && nm) { fornecedores.push({id, nome: nm}); localStorage.setItem('fornecedores', JSON.stringify(fornecedores)); document.getElementById('fornCod').value = ""; document.getElementById('fornNome').value = ""; listarFornecedores(); atualizarSelectsFiltro(); }
-        }
+    function removerBasico(tipo, idx) {
+        const lista = tipo === 'compradores' ? compradores : fornecedores;
+        lista.splice(idx, 1);
+        localStorage.setItem(tipo, JSON.stringify(lista));
+        atualizarSelects();
+        listarBasico(tipo);
+    }
 
-        function atualizarSelectsFiltro() {
-            document.getElementById('filtroComprador').innerHTML = '<option value="">Todos Compradores</option>' + compradores.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
-            document.getElementById('filtroFornecedor').innerHTML = '<option value="">Todos Fornecedores</option>' + fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
-        }
-
-        function listarCompradores() { document.getElementById('listaCompCadastrados').innerHTML = compradores.map((c, i) => `<div style="display:flex; justify-content:space-between; margin-top:5px"><span>${c.nome}</span><button onclick="compradores.splice(${i},1); localStorage.setItem('compradores',JSON.stringify(compradores)); listarCompradores(); atualizarSelectsFiltro();">X</button></div>`).join(''); }
-        function listarFornecedores() { document.getElementById('listaFornCadastrados').innerHTML = fornecedores.map((f, i) => `<div style="display:flex; justify-content:space-between; margin-top:5px"><span>${f.nome}</span><button onclick="fornecedores.splice(${i},1); localStorage.setItem('fornecedores',JSON.stringify(fornecedores)); listarFornecedores(); atualizarSelectsFiltro();">X</button></div>`).join(''); }
-        function abrirModalComprador() { document.getElementById('modalCompradores').style.display='block'; listarCompradores(); }
-        function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display='block'; listarFornecedores(); }
-        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-        function limparCamposProduto() { document.getElementById('codProduto').value = ""; document.getElementById('nomeProduto').innerText = ""; document.getElementById('qtdItem').value = ""; document.getElementById('custoItem').value = ""; document.getElementById('vendaItem').value = ""; document.getElementById('gastoItem').value = "0"; }
-        function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
-        function imprimirSelecionados() { const marcados = document.querySelectorAll('.chk-item:checked'); let h = `Relatório Colméia\n\n`; marcados.forEach(c => { const it = lancamentos[c.value]; h += `${it.dataBR} | ${it.comprador} | ${it.nomeProduto}\n`; }); alert(h); }
-    </script>
+    function imprimirCupom(idx) {
+        const it = lancamentos[idx];
+        const win = window.open('', '', 'width=300');
+        win.document.write(`CUPOM: ${it.nome} | TOTAL: R$ ${(it.venda * it.qtd).toFixed(2)}`);
+        win.print(); win.close();
+    }
+</script>
 </body>
 </html>
