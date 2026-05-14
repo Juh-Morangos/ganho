@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA COLMÉIA - LANÇAMENTO POR LOTE</title>
+    <title>SISTEMA COLMÉIA - LANÇAMENTO RÁPIDO</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -25,7 +25,6 @@
         .btn-dashboard { background-color: #8e44ad; }
         
         .btn-acao { padding: 5px 10px; font-size: 13px; margin-right: 2px; border-radius: 4px; border: none; cursor: pointer; color: white;}
-        .btn-editar { background-color: #fbbc05; color: #333;}
         .btn-excluir { background-color: #ea4335; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
@@ -37,10 +36,10 @@
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
         
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .full-width { grid-column: 1 / -1; }
         
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 13px; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
+        .form-group input:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 5px rgba(26,115,232,0.2); }
         
         .info-busca { display: block; font-size: 12px; color: #1a73e8; margin-top: 4px; min-height: 16px; font-weight: bold; }
         
@@ -48,14 +47,13 @@
         .carrinho-container { margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; max-height: 300px; overflow-y: auto; }
         
         .badge-total { font-size: 18px; font-weight: bold; color: #1a73e8; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
     <header>
         <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 45px;">
-        <h1 style="margin: 0; font-size: 22px;">Lançamentos por Lote</h1>
+        <h1 style="margin: 0; font-size: 22px;">Sistema de Lançamento Rápido</h1>
     </header>
 
     <main>
@@ -95,7 +93,7 @@
         </table>
     </main>
 
-    <!-- MODAL DE LANÇAMENTO (ESTILO CARRINHO) -->
+    <!-- MODAL DE LANÇAMENTO -->
     <div id="modalLancamento" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
@@ -105,11 +103,11 @@
             <div class="form-grid" style="margin-bottom: 20px; background: #fff;">
                 <div class="form-group">
                     <label>Data do Lote:</label>
-                    <input type="date" id="dataLote" class="campo-lote">
+                    <input type="date" id="dataLote" class="input-nav">
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Fornecedor (Cód ou Nome):</label>
-                    <input type="text" id="codFornecedor" class="campo-lote" placeholder="Aperte Enter para buscar" onblur="buscarFornecedor()">
+                    <input type="text" id="codFornecedor" class="input-nav" placeholder="Digite e aperte Enter" onblur="buscarFornecedor()">
                     <span id="nomeFornecedor" class="info-busca"></span>
                 </div>
             </div>
@@ -118,31 +116,31 @@
             <div class="form-grid">
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Produto (Cód ou Nome):</label>
-                    <input type="text" id="codProduto" class="campo-item" placeholder="Buscar produto..." onblur="buscarProduto()">
+                    <input type="text" id="codProduto" class="input-nav" placeholder="Buscar produto..." onblur="buscarProduto()">
                     <span id="nomeProduto" class="info-busca"></span>
                 </div>
                 <div class="form-group">
                     <label>Quantidade:</label>
-                    <input type="number" id="qtdItem" class="campo-item" min="1">
+                    <input type="number" id="qtdItem" class="input-nav" min="1">
                 </div>
                 <div class="form-group">
                     <label>Preço Custo Un (R$):</label>
-                    <input type="number" id="custoItem" class="campo-item" step="0.01">
+                    <input type="number" id="custoItem" class="input-nav" step="0.01">
                 </div>
                 <div class="form-group">
                     <label>Preço Venda Un (R$):</label>
-                    <input type="number" id="vendaItem" class="campo-item" step="0.01">
+                    <input type="number" id="vendaItem" class="input-nav" step="0.01">
                 </div>
                 <div class="form-group">
                     <label>Gasto Extra Un (R$):</label>
-                    <input type="number" id="gastoItem" class="campo-item" step="0.01" value="0">
+                    <input type="number" id="gastoItem" class="input-nav" step="0.01" value="0">
                 </div>
                 <div class="form-group" style="display:flex; align-items:flex-end;">
-                    <button type="button" class="btn btn-novo" style="width:100%" onclick="adicionarAoCarrinho()">+ Adicionar</button>
+                    <button type="button" id="btnAdicionar" class="btn btn-novo" style="width:100%" onclick="adicionarAoCarrinho()">+ Adicionar (Enter)</button>
                 </div>
             </div>
 
-            <!-- TABELA TEMPORÁRIA (CARRINHO) -->
+            <!-- TABELA TEMPORÁRIA -->
             <div class="carrinho-container">
                 <table>
                     <thead>
@@ -160,25 +158,12 @@
                 </table>
             </div>
 
-            <!-- RESUMO DO LOTE -->
             <div class="resultado-lucro" style="display: flex; justify-content: space-around; align-items: center;">
-                <div>CUSTO TOTAL DO LOTE: <br><span id="resumoCustoLote" class="badge-total">R$ 0.00</span></div>
-                <div>LUCRO TOTAL ESTIMADO: <br><span id="resumoLucroLote" class="badge-total" style="color:#2d8e47">R$ 0.00</span></div>
+                <div>CUSTO TOTAL LOTE: <span id="resumoCustoLote" class="badge-total">R$ 0.00</span></div>
+                <div>LUCRO TOTAL LOTE: <span id="resumoLucroLote" class="badge-total" style="color:#2d8e47">R$ 0.00</span></div>
             </div>
 
             <button class="btn btn-salvar" onclick="salvarLoteCompleto()">FINALIZAR E SALVAR LANÇAMENTOS</button>
-        </div>
-    </div>
-
-    <!-- MODAL FORNECEDORES -->
-    <div id="modalFornecedores" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
-            <h2>Cadastro de Fornecedores</h2>
-            <input type="text" id="fornCod" placeholder="Código" style="width:30%; padding:8px">
-            <input type="text" id="fornNome" placeholder="Nome do Fornecedor" style="width:65%; padding:8px">
-            <button class="btn btn-novo" style="width:100%; margin-top:10px" onclick="cadastrarFornecedor()">Salvar Fornecedor</button>
-            <div id="listaFornCadastrados" style="margin-top:15px"></div>
         </div>
     </div>
 
@@ -199,7 +184,25 @@
             renderizarTabela();
         };
 
-        // --- INTEGRAÇÃO API ---
+        // --- NAVEGAÇÃO POR ENTER ---
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const inputs = Array.from(document.querySelectorAll('.input-nav'));
+                const index = inputs.indexOf(document.activeElement);
+                
+                if (index > -1) {
+                    e.preventDefault();
+                    // Se estiver no último campo (gastoItem), foca no botão adicionar
+                    if (document.activeElement.id === 'gastoItem') {
+                        adicionarAoCarrinho();
+                    } else {
+                        // Pula para o próximo campo
+                        inputs[index + 1].focus();
+                    }
+                }
+            }
+        });
+
         async function carregarDadosAPI() {
             try {
                 const res = await fetch(URL_DADOS);
@@ -213,7 +216,6 @@
             } catch (e) { console.error("Erro API:", e); }
         }
 
-        // --- MODAIS ---
         function abrirModalLancamento() {
             document.getElementById('modalLancamento').style.display = 'block';
             carrinhoTemporario = [];
@@ -222,11 +224,11 @@
             document.getElementById('codFornecedor').value = "";
             document.getElementById('nomeFornecedor').innerText = "";
             limparCamposProduto();
+            setTimeout(() => document.getElementById('codFornecedor').focus(), 100);
         }
 
         function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // --- BUSCAS ---
         function buscarFornecedor() {
             const termo = document.getElementById('codFornecedor').value.toLowerCase().trim();
             if(!termo) return;
@@ -234,7 +236,6 @@
             if(f) {
                 document.getElementById('codFornecedor').value = f.id;
                 document.getElementById('nomeFornecedor').innerText = f.nome;
-                document.getElementById('codProduto').focus();
             } else {
                 document.getElementById('nomeFornecedor').innerText = "Fornecedor não encontrado";
             }
@@ -248,13 +249,11 @@
                 document.getElementById('codProduto').value = p.codigo;
                 document.getElementById('nomeProduto').innerText = p.nome;
                 document.getElementById('vendaItem').value = p.preco;
-                document.getElementById('qtdItem').focus();
             } else {
                 document.getElementById('nomeProduto').innerText = "Não encontrado";
             }
         }
 
-        // --- LÓGICA DO CARRINHO ---
         function adicionarAoCarrinho() {
             const codP = document.getElementById('codProduto').value;
             const nomeP = document.getElementById('nomeProduto').innerText;
@@ -264,57 +263,39 @@
             const gastoExUn = parseFloat(document.getElementById('gastoItem').value) || 0;
 
             if(!codP || isNaN(qtd) || qtd <= 0) {
-                alert("Preencha produto e quantidade corretamente!");
+                alert("Preencha produto e quantidade!");
                 return;
             }
 
-            // Cálculo: Lucro Unitário = Venda - (Custo + Gasto Extra)
             const lucroUn = vendaUn - (custoUn + gastoExUn);
             const custoTotalItem = (custoUn + gastoExUn) * qtd;
             const lucroTotalItem = lucroUn * qtd;
 
             carrinhoTemporario.push({
-                codProduto: codP,
-                nomeProduto: nomeP,
-                qtd,
-                custoUn,
-                vendaUn,
-                gastoExUn,
-                custoTotalItem,
-                lucroTotalItem,
-                lucroUn
+                codProduto: codP, nomeProduto: nomeP, qtd, custoUn, vendaUn, gastoExUn, custoTotalItem, lucroTotalItem, lucroUn
             });
 
             limparCamposProduto();
             atualizarCarrinhoUI();
+            // Volta o foco para o produto para o próximo item
             document.getElementById('codProduto').focus();
         }
 
         function atualizarCarrinhoUI() {
             const corpo = document.getElementById('corpoCarrinho');
             corpo.innerHTML = "";
-            let totalCusto = 0;
-            let totalLucro = 0;
-
+            let totalC = 0, totalL = 0;
             carrinhoTemporario.forEach((it, idx) => {
-                totalCusto += it.custoTotalItem;
-                totalLucro += it.lucroTotalItem;
-
-                corpo.innerHTML += `
-                    <tr>
-                        <td><b>${it.codProduto}</b> - ${it.nomeProduto}</td>
-                        <td>${it.qtd}</td>
-                        <td>R$ ${it.custoUn.toFixed(2)}</td>
-                        <td>R$ ${it.vendaUn.toFixed(2)}</td>
-                        <td style="color:${it.lucroUn >= 0 ? 'green':'red'}">R$ ${it.lucroUn.toFixed(2)}</td>
-                        <td style="font-weight:bold">R$ ${it.lucroTotalItem.toFixed(2)}</td>
-                        <td><button class="btn-excluir" style="border:none; border-radius:4px; cursor:pointer" onclick="removerDoCarrinho(${idx})">✕</button></td>
-                    </tr>
-                `;
+                totalC += it.custoTotalItem; totalL += it.lucroTotalItem;
+                corpo.innerHTML += `<tr>
+                    <td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.custoUn.toFixed(2)}</td>
+                    <td>R$ ${it.vendaUn.toFixed(2)}</td><td style="color:${it.lucroUn >= 0 ? 'green':'red'}">R$ ${it.lucroUn.toFixed(2)}</td>
+                    <td><b>R$ ${it.lucroTotalItem.toFixed(2)}</b></td>
+                    <td><button class="btn-excluir" onclick="removerDoCarrinho(${idx})">✕</button></td>
+                </tr>`;
             });
-
-            document.getElementById('resumoCustoLote').innerText = `R$ ${totalCusto.toFixed(2)}`;
-            document.getElementById('resumoLucroLote').innerText = `R$ ${totalLucro.toFixed(2)}`;
+            document.getElementById('resumoCustoLote').innerText = `R$ ${totalC.toFixed(2)}`;
+            document.getElementById('resumoLucroLote').innerText = `R$ ${totalL.toFixed(2)}`;
         }
 
         function removerDoCarrinho(idx) {
@@ -328,33 +309,31 @@
             const nomeF = document.getElementById('nomeFornecedor').innerText;
 
             if(!data || !codF || carrinhoTemporario.length === 0) {
-                alert("Selecione data, fornecedor e adicione ao menos 1 produto!");
+                alert("Preencha todos os dados do lote!");
                 return;
             }
 
             carrinhoTemporario.forEach(it => {
                 lancamentos.unshift({
-                    dataRAW: data,
-                    dataBR: data.split('-').reverse().join('/'),
-                    codFornecedor: codF,
-                    nomeFornecedor: nomeF,
-                    ...it,
-                    lucro: it.lucroTotalItem // compatibilidade com tabela antiga
+                    dataRAW: data, dataBR: data.split('-').reverse().join('/'),
+                    codFornecedor: codF, nomeFornecedor: nomeF, ...it, lucro: it.lucroTotalItem
                 });
             });
 
             localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
             renderizarTabela();
             fecharModal('modalLancamento');
-            alert("Lote lançado com sucesso!");
         }
 
         function limparCamposProduto() {
-            document.querySelectorAll('.campo-item').forEach(i => i.value = (i.id === 'gastoItem' ? "0" : ""));
+            document.getElementById('codProduto').value = "";
             document.getElementById('nomeProduto').innerText = "";
+            document.getElementById('qtdItem').value = "";
+            document.getElementById('custoItem').value = "";
+            document.getElementById('vendaItem').value = "";
+            document.getElementById('gastoItem').value = "0";
         }
 
-        // --- RENDERIZAÇÃO TABELA PRINCIPAL ---
         function renderizarTabela() {
             const tbody = document.getElementById('listaGeral');
             tbody.innerHTML = "";
@@ -366,18 +345,11 @@
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><input type="checkbox" class="chk-item" value="${idx}"></td>
-                        <td>${it.dataBR}</td>
-                        <td>${it.nomeFornecedor}</td>
-                        <td>${it.nomeProduto}</td>
-                        <td align="center"><b>${it.qtd}</b></td>
-                        <td>R$ ${it.custoUn.toFixed(2)}</td>
-                        <td>R$ ${it.vendaUn.toFixed(2)}</td>
-                        <td>R$ ${it.gastoExUn.toFixed(2)}</td>
-                        <td>R$ ${it.custoTotalItem.toFixed(2)}</td>
+                        <td>${it.dataBR}</td><td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td>
+                        <td align="center">${it.qtd}</td><td>R$ ${it.custoUn.toFixed(2)}</td><td>R$ ${it.vendaUn.toFixed(2)}</td>
+                        <td>R$ ${it.gastoExUn.toFixed(2)}</td><td>R$ ${it.custoTotalItem.toFixed(2)}</td>
                         <td style="font-weight:bold; color:${it.lucroTotalItem >=0 ? 'green':'red'}">R$ ${it.lucroTotalItem.toFixed(2)}</td>
-                        <td>
-                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${idx})">✖</button>
-                        </td>
+                        <td><button class="btn-acao btn-excluir" onclick="excluirLancamento(${idx})">✖</button></td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -385,7 +357,7 @@
         }
 
         function excluirLancamento(idx) {
-            if(confirm("Excluir este item permanentemente?")) {
+            if(confirm("Excluir item?")) {
                 lancamentos.splice(idx, 1);
                 localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
                 renderizarTabela();
@@ -397,7 +369,6 @@
             document.querySelectorAll('.chk-item').forEach(c => c.checked = m);
         }
 
-        // --- FORNECEDORES ---
         function abrirModalFornecedor() {
             document.getElementById('modalFornecedores').style.display = 'block';
             listarFornecedores();
@@ -406,52 +377,41 @@
         function cadastrarFornecedor() {
             const id = document.getElementById('fornCod').value;
             const nome = document.getElementById('fornNome').value;
-            if(!id || !nome) return;
-            fornecedores.push({id, nome});
-            localStorage.setItem('fornecedores', JSON.stringify(fornecedores));
-            listarFornecedores();
-            document.getElementById('fornCod').value = "";
-            document.getElementById('fornNome').value = "";
+            if(id && nome) {
+                fornecedores.push({id, nome});
+                localStorage.setItem('fornecedores', JSON.stringify(fornecedores));
+                listarFornecedores();
+                document.getElementById('fornCod').value = "";
+                document.getElementById('fornNome').value = "";
+            }
         }
 
         function listarFornecedores() {
             const div = document.getElementById('listaFornCadastrados');
             div.innerHTML = fornecedores.map((f, i) => `
-                <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee">
+                <div style="display:flex; justify-content:space-between; margin-top:5px; border-bottom:1px solid #eee">
                     <span>${f.id} - ${f.nome}</span>
-                    <button onclick="fornecedores.splice(${i},1); localStorage.setItem('fornecedores', JSON.stringify(fornecedores)); listarFornecedores()" style="color:red; border:none; background:none; cursor:pointer">Remover</button>
+                    <button onclick="fornecedores.splice(${i},1); localStorage.setItem('fornecedores', JSON.stringify(fornecedores)); listarFornecedores()" style="color:red; border:none; background:none; cursor:pointer">X</button>
                 </div>
             `).join('');
         }
 
-        // --- IMPRESSÃO ---
         function imprimirSelecionados() {
             const marcados = document.querySelectorAll('.chk-item:checked');
-            if(marcados.length === 0) return alert("Selecione itens na tabela!");
-            
-            let html = `<h2>Relatório de Lançamentos Colméia</h2><table border="1" style="width:100%; border-collapse:collapse">
-                <tr><th>Data</th><th>Fornecedor</th><th>Produto</th><th>Qtd</th><th>Custo Tot</th><th>Lucro Tot</th></tr>`;
-            
-            let totalL = 0;
+            if(marcados.length === 0) return alert("Selecione itens!");
+            let total = 0;
+            let html = `<h2>Relatório Colméia</h2><table border="1" style="width:100%; border-collapse:collapse"><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Lucro</th></tr>`;
             marcados.forEach(c => {
                 const it = lancamentos[c.value];
-                totalL += it.lucroTotalItem;
-                html += `<tr><td>${it.dataBR}</td><td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.custoTotalItem.toFixed(2)}</td><td>R$ ${it.lucroTotalItem.toFixed(2)}</td></tr>`;
+                total += it.lucroTotalItem;
+                html += `<tr><td>${it.dataBR}</td><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.lucroTotalItem.toFixed(2)}</td></tr>`;
             });
-            
-            html += `</table><h3>Lucro Total dos Selecionados: R$ ${totalL.toFixed(2)}</h3>`;
-            const win = window.open('', '', 'width=900,height=600');
+            html += `</table><h3>Total Lucro: R$ ${total.toFixed(2)}</h3>`;
+            const win = window.open('', '', 'width=800,height=600');
             win.document.write(html);
             win.document.close();
             win.print();
         }
-
-        // Atalhos de Teclado
-        document.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && document.getElementById('modalLancamento').style.display === 'block') {
-                if(document.activeElement.id === 'gastoItem') adicionarAoCarrinho();
-            }
-        });
     </script>
 </body>
 </html>
