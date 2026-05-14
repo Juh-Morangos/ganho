@@ -3,33 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA COLMÉIA - LANÇAMENTO RÁPIDO</title>
+    <title>Sistema Colméia v3 - Edição e Lucro Un.</title>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f2f5; margin: 0; padding: 0; }
-        
         header { background-color: #1a73e8; color: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
-        
-        main { max-width: 1400px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        main { max-width: 1400px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
         .controles { display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; }
-        .controles-acoes { display: flex; gap: 10px; align-items: center; }
-        
         .btn { border: none; padding: 10px 20px; font-size: 15px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; color: white; text-decoration: none; text-align: center; }
         .btn-novo { background-color: #34a853; }
-        .btn-novo:hover { background-color: #2d8e47; }
-        .btn-fornecedor { background-color: #fbbc05; color: #333; }
-        .btn-imprimir { background-color: #6c757d; }
         .btn-salvar { background-color: #1a73e8; width: 100%; padding: 15px; margin-top: 15px; font-size: 18px; }
-        .btn-dashboard { background-color: #8e44ad; }
         
-        .btn-acao { padding: 5px 10px; font-size: 13px; margin-right: 2px; border-radius: 4px; border: none; cursor: pointer; color: white;}
+        .btn-acao { padding: 6px 10px; font-size: 13px; margin-right: 3px; border-radius: 4px; border: none; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; min-width: 35px; }
         .btn-cupom { background-color: #17a2b8; }
+        .btn-editar { background-color: #fbbc05; color: #333; }
         .btn-excluir { background-color: #ea4335; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f8f9fa; color: #5f6368; text-transform: uppercase; font-size: 11px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto; }
@@ -37,38 +30,27 @@
         .close { position: absolute; right: 20px; top: 15px; color: #5f6368; font-size: 28px; font-weight: bold; cursor: pointer; }
         
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 4px; }
         
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #3c4043; font-size: 13px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; }
-        
-        .info-busca { display: block; font-size: 12px; color: #1a73e8; margin-top: 4px; min-height: 16px; font-weight: bold; }
-        
-        .resultado-lucro { background-color: #e6f4ea; padding: 15px; border-radius: 8px; border-left: 5px solid #34a853; text-align: center; margin-top: 10px; }
-        .carrinho-container { margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; max-height: 300px; overflow-y: auto; }
-        
-        .badge-total { font-size: 18px; font-weight: bold; color: #1a73e8; }
+        .info-busca { display: block; font-size: 12px; color: #1a73e8; margin-top: 4px; font-weight: bold; }
+        .carrinho-container { margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; max-height: 250px; overflow-y: auto; }
+        .resultado-lucro { background-color: #e6f4ea; padding: 15px; border-radius: 8px; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="https://i.postimg.cc/cCj4sBRm/branco.png" alt="Logo" style="height: 45px;">
-        <h1 style="margin: 0; font-size: 22px;">Sistema Colméia Pro</h1>
+        <h1 style="margin: 0; font-size: 22px;">Sistema Colméia - Gestão Completa</h1>
     </header>
 
     <main>
         <div class="controles">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label><strong>Período:</strong></label>
-                <input type="date" id="filtroDataInicio" onchange="renderizarTabela()">
-                <span>até</span>
+            <div>
+                <input type="date" id="filtroDataInicio" onchange="renderizarTabela()"> até 
                 <input type="date" id="filtroDataFim" onchange="renderizarTabela()">
             </div>
-
             <div class="controles-acoes">
-                <a href="dashboard.html" class="btn btn-dashboard">📊 Dashboard</a>
-                <button class="btn btn-imprimir" onclick="imprimirSelecionados()">🖨️ Imprimir Lista</button>
-                <button class="btn btn-fornecedor" onclick="abrirModalFornecedor()">👥 Fornecedores</button>
                 <button class="btn btn-novo" onclick="abrirModalLancamento()">+ Iniciar Novo Lote</button>
             </div>
         </div>
@@ -80,10 +62,11 @@
                     <th>Data</th>
                     <th>Fornecedor</th>
                     <th>Produto</th>
-                    <th style="text-align:center">Qtd</th>
+                    <th>Qtd</th>
                     <th>Custo Un.</th>
                     <th>Venda Un.</th>
                     <th>Gasto Ex.</th>
+                    <th style="color: #1a73e8;">Lucro Un.</th>
                     <th>Lucro Total</th>
                     <th>Ações</th>
                 </tr>
@@ -96,8 +79,10 @@
     <div id="modalLancamento" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modalLancamento')">&times;</span>
-            <h2 style="color: #1a73e8; margin-bottom: 10px;">Novo Lote de Produtos</h2>
+            <h2 id="tituloModal" style="color: #1a73e8;">Novo Lote</h2>
             
+            <input type="hidden" id="editIndexGlobal" value="">
+
             <div class="form-grid" style="margin-bottom: 20px; background: #fff;">
                 <div class="form-group">
                     <label>Data:</label>
@@ -105,7 +90,7 @@
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Fornecedor:</label>
-                    <input type="text" id="codFornecedor" class="input-nav" placeholder="Cód ou Nome" onblur="buscarFornecedor()">
+                    <input type="text" id="codFornecedor" class="input-nav" onblur="buscarFornecedor()">
                     <span id="nomeFornecedor" class="info-busca"></span>
                 </div>
             </div>
@@ -113,7 +98,7 @@
             <div class="form-grid">
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Produto:</label>
-                    <input type="text" id="codProduto" class="input-nav" placeholder="Cód ou Nome" onblur="buscarProduto()">
+                    <input type="text" id="codProduto" class="input-nav" onblur="buscarProduto()">
                     <span id="nomeProduto" class="info-busca"></span>
                 </div>
                 <div class="form-group">
@@ -133,19 +118,18 @@
                     <input type="number" id="gastoItem" class="input-nav" step="0.01" value="0">
                 </div>
                 <div class="form-group" style="display:flex; align-items:flex-end;">
-                    <button type="button" class="btn btn-novo" style="width:100%" onclick="adicionarAoCarrinho()">+ Adicionar</button>
+                    <button type="button" id="btnAcaoInterna" class="btn btn-novo" style="width:100%" onclick="adicionarAoCarrinho()">+ Adicionar</button>
                 </div>
             </div>
 
-            <div class="carrinho-container">
+            <div class="carrinho-container" id="areaCarrinho">
                 <table>
                     <thead>
                         <tr style="background:#eee">
                             <th>Produto</th>
                             <th>Qtd</th>
-                            <th>Custo Un</th>
-                            <th>Venda Un</th>
-                            <th>Lucro Total</th>
+                            <th>Custo Tot</th>
+                            <th>Lucro Un</th>
                             <th>Ação</th>
                         </tr>
                     </thead>
@@ -153,24 +137,7 @@
                 </table>
             </div>
 
-            <div class="resultado-lucro" style="display: flex; justify-content: space-around;">
-                <div>CUSTO LOTE: <span id="resumoCustoLote" class="badge-total">R$ 0.00</span></div>
-                <div>LUCRO LOTE: <span id="resumoLucroLote" class="badge-total" style="color:#2d8e47">R$ 0.00</span></div>
-            </div>
-
-            <button class="btn btn-salvar" onclick="salvarLoteCompleto()">FINALIZAR E SALVAR TUDO</button>
-        </div>
-    </div>
-
-    <!-- MODAL FORNECEDORES -->
-    <div id="modalFornecedores" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="close" onclick="fecharModal('modalFornecedores')">&times;</span>
-            <h2>Cadastro de Fornecedores</h2>
-            <input type="text" id="fornCod" placeholder="Cód" style="width:20%; padding:8px">
-            <input type="text" id="fornNome" placeholder="Nome" style="width:75%; padding:8px">
-            <button class="btn btn-novo" style="width:100%; margin-top:10px" onclick="cadastrarFornecedor()">Salvar</button>
-            <div id="listaFornCadastrados" style="margin-top:15px"></div>
+            <button class="btn btn-salvar" id="btnFinalizar" onclick="salvarLoteCompleto()">SALVAR LANÇAMENTOS</button>
         </div>
     </div>
 
@@ -191,7 +158,20 @@
             renderizarTabela();
         };
 
-        // Atalhos de Teclado (Enter)
+        async function carregarDadosAPI() {
+            try {
+                const res = await fetch(URL_DADOS);
+                const text = await res.text();
+                const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
+                listaProdutosAPI = json.table.rows.map(r => ({
+                    codigo: r.c[0] ? r.c[0].v.toString() : '',
+                    nome: r.c[1] ? r.c[1].v : '',
+                    preco: r.c[2] ? parseFloat(r.c[2].v) : 0
+                }));
+            } catch (e) { console.error("Erro API:", e); }
+        }
+
+        // Navegação Enter
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const nav = Array.from(document.querySelectorAll('.input-nav'));
@@ -207,21 +187,13 @@
             }
         });
 
-        async function carregarDadosAPI() {
-            try {
-                const res = await fetch(URL_DADOS);
-                const text = await res.text();
-                const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/)[1]);
-                listaProdutosAPI = json.table.rows.map(r => ({
-                    codigo: r.c[0] ? r.c[0].v.toString() : '',
-                    nome: r.c[1] ? r.c[1].v : '',
-                    preco: r.c[2] ? parseFloat(r.c[2].v) : 0
-                }));
-            } catch (e) { console.error("Erro API:", e); }
-        }
-
         function abrirModalLancamento() {
             document.getElementById('modalLancamento').style.display = 'block';
+            document.getElementById('tituloModal').innerText = "Novo Lote";
+            document.getElementById('editIndexGlobal').value = "";
+            document.getElementById('areaCarrinho').style.display = 'block';
+            document.getElementById('btnFinalizar').style.display = 'block';
+            document.getElementById('btnAcaoInterna').innerText = "+ Adicionar";
             carrinhoTemporario = [];
             atualizarCarrinhoUI();
             document.getElementById('dataLote').value = new Date().toISOString().split('T')[0];
@@ -237,7 +209,7 @@
             if(f) {
                 document.getElementById('codFornecedor').value = f.id;
                 document.getElementById('nomeFornecedor').innerText = f.nome;
-            } else document.getElementById('nomeFornecedor').innerText = "Não encontrado";
+            } else document.getElementById('nomeFornecedor').innerText = "Não cadastrado";
         }
 
         function buscarProduto() {
@@ -262,11 +234,25 @@
             if(!cp || !qt) return alert("Preencha Produto e Qtd!");
 
             const lUn = vi - (ci + gi);
-            carrinhoTemporario.push({
+            const item = {
                 codProduto: cp, nomeProduto: np, qtd: qt, custoUn: ci, vendaUn: vi, gastoExUn: gi, 
                 custoTotalItem: (ci + gi) * qt, lucroTotalItem: lUn * qt, lucroUn: lUn
-            });
+            };
 
+            // Se for uma edição de item único da tabela principal
+            const idxEdit = document.getElementById('editIndexGlobal').value;
+            if(idxEdit !== "") {
+                const dt = document.getElementById('dataLote').value;
+                const cf = document.getElementById('codFornecedor').value;
+                const nf = document.getElementById('nomeFornecedor').innerText;
+                lancamentos[idxEdit] = { dataRAW: dt, dataBR: dt.split('-').reverse().join('/'), codFornecedor: cf, nomeFornecedor: nf, ...item, lucro: item.lucroTotalItem };
+                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+                renderizarTabela();
+                fecharModal('modalLancamento');
+                return;
+            }
+
+            carrinhoTemporario.push(item);
             limparCamposProduto();
             atualizarCarrinhoUI();
             document.getElementById('codProduto').focus();
@@ -275,16 +261,10 @@
         function atualizarCarrinhoUI() {
             const corpo = document.getElementById('corpoCarrinho');
             corpo.innerHTML = "";
-            let tc = 0, tl = 0;
             carrinhoTemporario.forEach((it, idx) => {
-                tc += it.custoTotalItem; tl += it.lucroTotalItem;
-                corpo.innerHTML += `<tr><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.custoUn.toFixed(2)}</td><td>R$ ${it.vendaUn.toFixed(2)}</td><td>R$ ${it.lucroTotalItem.toFixed(2)}</td><td><button class="btn-excluir" onclick="removerDoCarrinho(${idx})">✕</button></td></tr>`;
+                corpo.innerHTML += `<tr><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.custoTotalItem.toFixed(2)}</td><td>R$ ${it.lucroUn.toFixed(2)}</td><td><button class="btn-excluir" onclick="carrinhoTemporario.splice(${idx},1); atualizarCarrinhoUI()">✕</button></td></tr>`;
             });
-            document.getElementById('resumoCustoLote').innerText = `R$ ${tc.toFixed(2)}`;
-            document.getElementById('resumoLucroLote').innerText = `R$ ${tl.toFixed(2)}`;
         }
-
-        function removerDoCarrinho(idx) { carrinhoTemporario.splice(idx, 1); atualizarCarrinhoUI(); }
 
         function salvarLoteCompleto() {
             const dt = document.getElementById('dataLote').value;
@@ -300,13 +280,26 @@
             fecharModal('modalLancamento');
         }
 
-        function limparCamposProduto() {
-            document.getElementById('codProduto').value = "";
-            document.getElementById('nomeProduto').innerText = "";
-            document.getElementById('qtdItem').value = "";
-            document.getElementById('custoItem').value = "";
-            document.getElementById('vendaItem').value = "";
-            document.getElementById('gastoItem').value = "0";
+        function alterarLancamento(idx) {
+            const it = lancamentos[idx];
+            document.getElementById('modalLancamento').style.display = 'block';
+            document.getElementById('tituloModal').innerText = "Alterar Lançamento";
+            document.getElementById('editIndexGlobal').value = idx;
+            
+            // Esconde carrinho para edição única
+            document.getElementById('areaCarrinho').style.display = 'none';
+            document.getElementById('btnFinalizar').style.display = 'none';
+            document.getElementById('btnAcaoInterna').innerText = "Atualizar Item";
+
+            document.getElementById('dataLote').value = it.dataRAW;
+            document.getElementById('codFornecedor').value = it.codFornecedor;
+            document.getElementById('nomeFornecedor').innerText = it.nomeFornecedor;
+            document.getElementById('codProduto').value = it.codProduto;
+            document.getElementById('nomeProduto').innerText = it.nomeProduto;
+            document.getElementById('qtdItem').value = it.qtd;
+            document.getElementById('custoItem').value = it.custoUn;
+            document.getElementById('vendaItem').value = it.vendaUn;
+            document.getElementById('gastoItem').value = it.gastoExUn;
         }
 
         function renderizarTabela() {
@@ -320,112 +313,36 @@
                     tbody.innerHTML += `<tr>
                         <td><input type="checkbox" class="chk-item" value="${idx}"></td>
                         <td>${it.dataBR}</td><td>${it.nomeFornecedor}</td><td>${it.nomeProduto}</td>
-                        <td align="center">${it.qtd}</td><td>R$ ${it.custoUn.toFixed(2)}</td><td>R$ ${it.vendaUn.toFixed(2)}</td>
-                        <td>R$ ${it.gastoExUn.toFixed(2)}</td><td style="font-weight:bold; color:${it.lucroTotalItem >=0 ? 'green':'red'}">R$ ${it.lucroTotalItem.toFixed(2)}</td>
+                        <td>${it.qtd}</td><td>R$ ${it.custoUn.toFixed(2)}</td><td>R$ ${it.vendaUn.toFixed(2)}</td>
+                        <td>R$ ${it.gastoExUn.toFixed(2)}</td>
+                        <td style="font-weight:bold; color:#1a73e8">R$ ${it.lucroUn.toFixed(2)}</td>
+                        <td style="font-weight:bold; color:${it.lucroTotalItem >=0 ? 'green':'red'}">R$ ${it.lucroTotalItem.toFixed(2)}</td>
                         <td>
-                            <button class="btn-acao btn-cupom" onclick="imprimirCupom(${idx})" title="Cupom Térmico">🎫</button>
-                            <button class="btn-acao btn-excluir" onclick="excluirLancamento(${idx})">✖</button>
+                            <button class="btn-acao btn-editar" onclick="alterarLancamento(${idx})">✎</button>
+                            <button class="btn-acao btn-cupom" onclick="imprimirCupom(${idx})">🎫</button>
+                            <button class="btn-acao btn-excluir" onclick="if(confirm('Excluir?')) {lancamentos.splice(${idx},1); localStorage.setItem('lancamentos', JSON.stringify(lancamentos)); renderizarTabela();}">✖</button>
                         </td>
                     </tr>`;
                 }
             });
         }
 
-        function excluirLancamento(idx) {
-            if(confirm("Excluir?")) {
-                lancamentos.splice(idx, 1);
-                localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
-                renderizarTabela();
-            }
-        }
-
-        // --- FUNÇÃO IMPRIMIR CUPOM TÉRMICO ---
         function imprimirCupom(idx) {
             const it = lancamentos[idx];
             const win = window.open('', '', 'width=300,height=600');
-            
-            win.document.write(`
-                <html>
-                <head>
-                    <style>
-                        @page { margin: 0; }
-                        body { 
-                            width: 80mm; font-family: 'Courier New', Courier, monospace; 
-                            padding: 5mm; margin: 0; font-size: 12px; line-height: 1.2;
-                        }
-                        .centro { text-align: center; }
-                        .negrito { font-weight: bold; }
-                        .linha { border-top: 1px dashed #000; margin: 5px 0; }
-                        .flex { display: flex; justify-content: space-between; }
-                        .item { margin-bottom: 3px; }
-                        @media print { body { width: 80mm; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="centro negrito" style="font-size: 16px;">SISTEMA COLMÉIA</div>
-                    <div class="centro">Lançamento de Produto</div>
-                    <div class="linha"></div>
-                    <div class="flex"><span>DATA:</span> <span>${it.dataBR}</span></div>
-                    <div class="flex"><span>FORN:</span> <span>${it.nomeFornecedor}</span></div>
-                    <div class="linha"></div>
-                    <div class="negrito">${it.nomeProduto}</div>
-                    <div class="flex"><span>QTD:</span> <span>${it.qtd}</span></div>
-                    <div class="flex"><span>VALOR UN:</span> <span>R$ ${it.vendaUn.toFixed(2)}</span></div>
-                    <div class="linha"></div>
-                    <div class="flex negrito" style="font-size: 14px;">
-                        <span>TOTAL:</span> 
-                        <span>R$ ${(it.vendaUn * it.qtd).toFixed(2)}</span>
-                    </div>
-                    <div class="linha"></div>
-                    <div class="centro" style="margin-top: 10px;">
-                        Obrigado pela preferência!<br>
-                        ----------------------------
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            win.document.close();
-            win.focus();
-            setTimeout(() => { win.print(); win.close(); }, 250);
-        }
-
-        // Cadastro Fornecedor
-        function cadastrarFornecedor() {
-            const id = document.getElementById('fornCod').value;
-            const nm = document.getElementById('fornNome').value;
-            if(id && nm) {
-                fornecedores.push({id, nm});
-                localStorage.setItem('fornecedores', JSON.stringify(fornecedores));
-                document.getElementById('fornCod').value = ""; document.getElementById('fornNome').value = "";
-                listarFornecedores();
-            }
-        }
-
-        function listarFornecedores() {
-            const div = document.getElementById('listaFornCadastrados');
-            div.innerHTML = fornecedores.map((f, i) => `<div style="display:flex; justify-content:space-between; margin-top:5px;"><span>${f.id} - ${f.nm}</span><button onclick="fornecedores.splice(${i},1); localStorage.setItem('fornecedores', JSON.stringify(fornecedores)); listarFornecedores()" style="color:red; border:none; background:none;">X</button></div>`).join('');
-        }
-
-        function abrirModalFornecedor() { document.getElementById('modalFornecedores').style.display='block'; listarFornecedores(); }
-        function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
-        
-        function imprimirSelecionados() {
-            const marcados = document.querySelectorAll('.chk-item:checked');
-            if(marcados.length === 0) return alert("Selecione itens!");
-            let total = 0;
-            let html = `<h2>Relatório Colméia</h2><table border="1" style="width:100%; border-collapse:collapse"><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Lucro</th></tr>`;
-            marcados.forEach(c => {
-                const it = lancamentos[c.value];
-                total += it.lucroTotalItem;
-                html += `<tr><td>${it.dataBR}</td><td>${it.nomeProduto}</td><td>${it.qtd}</td><td>R$ ${it.lucroTotalItem.toFixed(2)}</td></tr>`;
-            });
-            html += `</table><h3>Total Lucro: R$ ${total.toFixed(2)}</h3>`;
-            const win = window.open('', '', 'width=800,height=600');
-            win.document.write(html);
+            win.document.write(`<html><body style="width:80mm; font-family:monospace;"><h3>SISTEMA COLMÉIA</h3><hr>${it.dataBR}<br>${it.nomeProduto}<br>QTD: ${it.qtd}<br>TOTAL: R$ ${(it.vendaUn * it.qtd).toFixed(2)}<hr></body></html>`);
             win.document.close();
             win.print();
+            win.close();
         }
+
+        function limparCamposProduto() {
+            document.getElementById('codProduto').value = ""; document.getElementById('nomeProduto').innerText = "";
+            document.getElementById('qtdItem').value = ""; document.getElementById('custoItem').value = "";
+            document.getElementById('vendaItem').value = ""; document.getElementById('gastoItem').value = "0";
+        }
+
+        function selecionarTodos() { const m = document.getElementById('chkTodos').checked; document.querySelectorAll('.chk-item').forEach(c => c.checked = m); }
     </script>
 </body>
 </html>
